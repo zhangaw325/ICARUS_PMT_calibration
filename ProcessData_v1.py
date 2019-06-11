@@ -26,7 +26,7 @@ print("Analyzing data from " + dataDirectory + ". Files listed in " + filelistSt
 
 # record whether LED was on or off
 ledStatus = raw_input("LED On or Off (1 for on, 0 for off)?: ")
-while (ledStatus != '1' and ledStatus != ):
+while (ledStatus != '1' and ledStatus != '0'):
     ledStatus = raw_input("Input must be 0 or 1: ")
 ledStatus = int(ledStatus)
 
