@@ -21,7 +21,7 @@ tempStr = "filelist_"
 filehead = "A18_PMT_5_6_7_8_1460V_LedOff"
 filelistStr = tempStr + filehead + ".txt"
 rtfileoutputStr = filehead + "_result.root"
-dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/"
+dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/" + filehead + "/"
 
 #some constants
 NSamples = 12500 # number of data points in one waveform
