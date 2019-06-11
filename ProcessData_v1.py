@@ -318,7 +318,7 @@ def main():
         # would be best to have different settings for LED on vs LED off
         if ledStatus == 0:
             hist = TH1F(name,"",80,-4,4)
-        else
+        else:
             hist = TH1F(name,"",18,-4,50)
         hist.SetXTitle("Charge (pC)")
         hist.SetYTitle("Counts")
