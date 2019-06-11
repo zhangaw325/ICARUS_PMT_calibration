@@ -18,10 +18,11 @@ import peakutils
 
 #some input
 tempStr = "filelist_"
-filehead = "A18_PMT_5_6_7_8_1460V_LedOff"
+filehead = raw_input("Directory name: ") # ask user for data directory input
 filelistStr = tempStr + filehead + ".txt"
 rtfileoutputStr = filehead + "_result.root"
 dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/" + filehead + "/"
+print("Analyzing data from " + dataDirectory + ". Files listed in " + filelistStr)
 
 #some constants
 NSamples = 12500 # number of data points in one waveform
