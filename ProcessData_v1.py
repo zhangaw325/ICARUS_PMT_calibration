@@ -309,7 +309,8 @@ def main():
         hPedWidth_list.append(hist)
         # pulse charge due to fiber triggers, unit converted to fC
         name = "FinalCharge_" + str(i)
-        hist = TH1F(name,"",5100/2,-10,500)
+	# would be best to have different settings for LED on vs LED off
+        hist = TH1F(name,"",200,-10,50) # setting lower bound equal to upper results in autoscaling
         hist.SetXTitle("Charge (pC)")
         hist.SetYTitle("Counts")
         hist.SetLineColor(i+1)
