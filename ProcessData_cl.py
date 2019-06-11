@@ -5,6 +5,8 @@ from array import array
 from ROOT import TCanvas, TGraph, TH1F, TFile, TH2F
 import peakutils
 
+import sys # for command-line input
+
 # for me to pick
 # A10_PMT_1_2_3_4_1520V_LedOff
 # A10_PMT_1_2_3_4_1520V_LedOn
@@ -18,17 +20,21 @@ import peakutils
 
 #some input
 tempStr = "filelist_"
-filehead = raw_input("Directory name: ") # ask user for data directory input
+filehead = sys.argv[1] # ask user for data directory input
 filelistStr = tempStr + filehead + ".txt"
 rtfileoutputStr = filehead + "_result.root"
-dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/" + filehead + "/"
-print("Analyzing data from " + dataDirectory + ". Files listed in " + filelistStr)
+# dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/" + filehead + "/"
+print("Analyzing data from " + filehead + ". Files listed in " + filelistStr)
+
+
+def isLEDOn(directoryName):
+	if directoryName.find("ON") >= -1:
+		return True
+	else:
+		return False
 
 # record whether LED was on or off
-ledStatus = raw_input("LED On or Off (1 for on, 0 for off)?: ")
-while (ledStatus != '1' and ledStatus != '0'):
-    ledStatus = raw_input("Input must be 0 or 1: ")
-ledStatus = int(ledStatus)
+ledStatus = isLEDOn(filehead)
 
 #some constants
 NSamples = 12500 # number of data points in one waveform
@@ -316,7 +322,7 @@ def main():
         # pulse charge due to fiber triggers, unit converted to fC
         name = "FinalCharge_" + str(i)
         # would be best to have different settings for LED on vs LED off
-        if ledStatus == 0:
+        if ledStatus == False:
             hist = TH1F(name,"",80,-3,3)
         else:
             hist = TH1F(name,"",18,-4,50)
@@ -396,7 +402,7 @@ def main():
             #print afilename
             #if waveNb>20:
             #    continue
-            awave = np.asarray(decode_wfm(dataDirectory + afilename))
+            awave = np.asarray(decode_wfm(afilename))
             #print "dump data "
             #for bin in range(NSamples):
             #    print awave[bin]
