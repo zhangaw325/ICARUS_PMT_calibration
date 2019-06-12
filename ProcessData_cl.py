@@ -44,7 +44,7 @@ QFactor = tpt/50.0*1000.0 # convert V*ns/50Ohm to charge in pC
 Nsigma = 5
 #Nwaves = 2000 # number of waveforms taken for a PMT
 
-Nwaves = len(open(filelistStr).readlines(  ))/4
+Nwaves = len(open(filelistStr).readlines(  ))/4 # unclear why this is divided by 4
 print "number of waveforms in this run: ", Nwaves
 #quit()
 
