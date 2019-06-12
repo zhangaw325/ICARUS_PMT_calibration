@@ -19,7 +19,7 @@ cd $DIR
 #echo $DIR
 
 #run python script
-python ./ProcessData_v1_acamino.py $dirDataName
+python ProcessData_cl.py $dirDataName
 
 #print message if successful
 echo "$dirDataName.root created"
