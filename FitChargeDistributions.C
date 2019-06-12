@@ -6,7 +6,7 @@ double IdealResponse(double *x,double *par);
 
 void FitChargeDistributions(string pmtRow,
 			    char pmt1, char pmt2, char pmt3, char pmt4,
-			    int volt1, int volt2, int volt3){
+			    int volt1, int volt2, int volt3, bool led){
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
   TF1* Fideal = new TF1("Fideal",IdealResponse, 0, 500, 4);
@@ -21,8 +21,13 @@ void FitChargeDistributions(string pmtRow,
   string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
   //string voltagestr[3]={"1440","1470","1500"};
   string voltagestr[3] = {to_string(volt1), to_string(volt2), to_string(volt3)};
+  string ledstr;
+  if(led)
+    ledstr = "On";
+  else
+    ledstr = "Off";
   for(int i=0; i<3; i++){
-    rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_LedOn_result.root";
+    rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
     cout << rtfilenames[i] << endl;
   }
   const int NCH = 4; // 4 PMTs
@@ -34,8 +39,8 @@ void FitChargeDistributions(string pmtRow,
                     "A12_PMT4"
                     };
                     */
-  int rebinfactor[NCH]={5, 1, 5, 5}; // histograms need some rebin
-  double fitbeginch[NCH]={2,1.5,1.5,0.5};
+  int rebinfactor[NCH]={1, 1, 1, 1}; // histograms need some rebin
+  double fitbeginch[NCH]={0.5,0.5,0.5,0.5};
 
   string outnameroot = strchimney + strpmt + "gain.root";
   string outnametxt = strchimney + strpmt + "gain_fit.txt";
