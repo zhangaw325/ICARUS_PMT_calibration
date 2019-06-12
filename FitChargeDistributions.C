@@ -1,7 +1,16 @@
+#include "TMath.h"
+#include "TF1.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TH1.h"
+#include "TFile.h"
+#include <iostream>
+
 //#include "Fit_Spe.C" // the fit function is defined in this file
 double PI = TMath::Pi();
 
 double IdealResponse(double *x,double *par);
+std::string* splitStringInto3(std::string s);
 
 void FitChargeDistributions(){
   // the function to be used to do fit
@@ -15,10 +24,27 @@ void FitChargeDistributions(){
   // process 3 files in a batch
   string rtfilenames[3];
   string strchimney = "A18_PMT_";
+  cout << "Enter chimney: ";
+  cin >> strchimney;
+
   string strpmt = "5_6_7_8_";
-  string voltagestr[3]={"1460","1490","1520"};
+  cout << "Enter PMTs: ";
+  cin >> strpmt;
+
+  std::string voltagestr[3]={"1460","1490","1520"};
+  std::string voltagesIn;
+  cout << "Enter comma-separated voltages: ";
+  cin >> voltagesIn;
+  std::string* voltagesSplit = splitStringInto3(voltagesIn);
+  for(int i = 0; i < 3; i++){
+  	voltagestr[i] = voltagesSplit[i];
+  }
+
+  std::string ledStatus = "On";
+  cout << "Enter On/Off: ";
+  cin >> ledStatus;
   for(int i=0; i<3; i++){
-     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_LedOn_result.root";
+     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledStatus + "_result.root";
   }
   const int NCH = 4; // 4 PMTs
   /*
@@ -29,6 +55,7 @@ void FitChargeDistributions(){
                     "A12_PMT4"
                     };
                     */
+  // UNCLEAR IF THIS REBINNING IS STILL NEEDED
   int rebinfactor[NCH]={5, 1, 5, 5}; // histograms need some rebin
   double fitbeginch[NCH]={2,1.5,1.5,0.5};
 
@@ -119,5 +146,24 @@ double IdealResponse(double *x,double *par){
         sum += TMath::Power(mu,n)*TMath::Exp(-1.0*mu)/TMath::Factorial(n)*TMath::Exp(-1.0*(x[0]-q*n)*(x[0]-q*n)/(2.0*n*sigma*sigma))/(sigma*TMath::Sqrt(2.0*PI*n));
     }
     return sum*amplitude;
+}
+
+std::string* splitStringInto3(std::string s){
+	static std::string out[3];
+
+	std::string delimiter = ",";
+
+	size_t pos = 0;
+	std::string token;
+	int i = 0;
+	while ((pos = s.find(delimiter)) != std::string::npos) {
+	    token = s.substr(0, pos);
+	    out[i] = token;
+	    s.erase(0, pos + delimiter.length());
+	    i++;
+	}
+	out[2] = s;
+
+	return out;
 }
 
