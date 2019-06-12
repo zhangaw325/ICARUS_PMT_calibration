@@ -323,7 +323,7 @@ def main():
         name = "FinalCharge_" + str(i)
         # would be best to have different settings for LED on vs LED off
         if ledStatus == False:
-            hist = TH1F(name,"",1000,-5,100)
+            hist = TH1F(name,"",1000,-5,45)
         else:
             hist = TH1F(name,"",1000,-5,100)
         hist.SetXTitle("Charge (pC)")
