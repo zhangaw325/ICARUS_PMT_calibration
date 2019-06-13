@@ -11,6 +11,7 @@ void FitChargeDistributions(string pmtRow,
 			    char pmt1, char pmt2, char pmt3, char pmt4,
 			    int volt1, int volt2, int volt3, bool led){
 
+  const int NCH = 4; // 4 PMTs
   // histogram and fit options
   int rebinfactor[NCH]={1, 1, 1, 1}; // rebin histograms
   double fitbeginch[NCH]={1.0,1.0,1.0,1.0};
@@ -39,7 +40,6 @@ void FitChargeDistributions(string pmtRow,
     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
     cout << rtfilenames[i] << endl;
   }
-  const int NCH = 4; // 4 PMTs
 
   string outnameroot = strchimney + strpmt + "gain.root";
   string outnametxt = strchimney + strpmt + "gain_fit.txt";
