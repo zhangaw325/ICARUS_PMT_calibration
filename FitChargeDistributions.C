@@ -13,7 +13,7 @@ void FitChargeDistributions(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rebinfactor[NCH]={1, 1, 1, 1}; // rebin histograms
+  int rebinfactor[NCH]={5, 5, 5, 5}; // rebin histograms
   double fitbeginch[NCH]={1.0,1.0,1.0,1.0};
   double fitend = 60;
 
@@ -74,21 +74,24 @@ void FitChargeDistributions(string pmtRow,
       hCharge[j]->Draw();
 
       // Set initial fit parameters
-      Fideal->SetParameter(1,1.6);
-      Fideal->SetParameter(2,1.6*0.4);
-      Fideal->SetParameter(3,hCharge[j]->Integral());
+      //Fideal->SetParameter(1,1.6);
+      //Fideal->SetParameter(2,1.6*0.4);
+      //Fideal->SetParameter(3,hCharge[j]->Integral());
       Fideal->SetParLimits(0,0.1,100);
       Fideal->SetParLimits(1,0.5,10);
       Fideal->SetParLimits(2,0.1,10);
       Fideal->SetParLimits(3,0.1,20000);
 
       // Iteratively fit more than once
-      for(int k=0; k<2;k++){
-        hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend); // Fit the histogram
-        Fideal->GetParameters(par);
-        Fideal->SetParameters(par); // Set fit parameters for next iteration
-      }
-
+      //for(int k=0; k<2;k++){
+        //hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend); // Fit the histogram
+        //Fideal->GetParameters(par);
+        //Fideal->SetParameters(par); // Set fit parameters for next iteration
+      //}
+      
+      //hCharge[j]->Fit("expo","","",fitbeginch[j],fitend);
+      hCharge[j]->Fit("Fideal","","",fitbeginch[j],fitend);
+      
       hCharge[j]->GetXaxis()->SetRangeUser(0, fitend); // Set axes
 
       // write parameters to output txt file
