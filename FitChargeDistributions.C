@@ -1,3 +1,5 @@
+#include "TH1.h"
+
 //#include "Fit_Spe.C" // the fit function is defined in this file
 
 double PI = TMath::Pi();
@@ -40,30 +42,33 @@ void FitChargeDistributions(string pmtRow,
                     };
                     */
   int rebinfactor[NCH]={1, 1, 1, 1}; // histograms need some rebin
-  double fitbeginch[NCH]={0.5,0.5,0.5,0.5};
+  double fitbeginch[NCH]={1.0,1.0,1.0,1.0};
 
   string outnameroot = strchimney + strpmt + "gain.root";
   string outnametxt = strchimney + strpmt + "gain_fit.txt";
   TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
   fstream foutFit(outnametxt.c_str(),ios::out);
-  TH1F* hCharge[NCH];
+  TH1F* hCharge[NCH]; // histograms
   TCanvas* c[3];
   char tempname[100];
+
+  // Read each of the three output ROOT files
   for(int i=0; i<3; i++){
     TFile* f = new TFile(rtfilenames[i].c_str(),"read");
     sprintf(tempname,"c_%d",i);
-    c[i] = new TCanvas(tempname,rtfilenames[i].c_str(),1200,900);
-//    c[i]->SetCanvasSize(1200,900);
-    c[i]->Divide(2,2);
+    c[i] = new TCanvas(tempname,rtfilenames[i].c_str(),1200,900); // generate canvas
+    c[i]->Divide(2,2); // divide canvas into four panels
+
+    // Generate histograms and fits for each of the four PMTs in each ROOT file
     for(int j=0; j<NCH; j++){
-      c[i]->cd(j+1);
-      sprintf(tempname,"Results/FinalCharge_%d",j);
+      c[i]->cd(j+1); // switch to the proper panel
+      sprintf(tempname,"Results/FinalCharge_%d",j); // store string "Results/FinalCharge_%d" in tempname
       hCharge[j] = (TH1F*)f->Get(tempname);
       hCharge[j]->Rebin(rebinfactor[j]);
       hCharge[j]->SetXTitle("Charge in pC, (10^{7} electrons = 1.6 pC)");
       hCharge[j]->Draw(); 
 
-      //Fideal->SetParameter(0,0.1);
+      // Set initial fit parameters
       Fideal->SetParameter(1,1.6);
       Fideal->SetParameter(2,1.6*0.4);
       Fideal->SetParameter(3,hCharge[j]->Integral());
@@ -72,29 +77,35 @@ void FitChargeDistributions(string pmtRow,
       Fideal->SetParLimits(2,0.1,10);
       Fideal->SetParLimits(3,0.1,20000);
 
-      if(j==1) Fideal->SetParameter(3,1000);
+      //if(j==1) Fideal->SetParameter(3,1000);
 
-      if(j==1 && i==2) fitbeginch[j] = 1.0;
+      //if(j==1 && i==2) fitbeginch[j] = 1.0;
       
       //hCharge[j]->GetXaxis()->SetRangeUser(0, hCharge[j]->GetMean()*5.0);
       //double fitbegin = 0;
       //if(j==2) fitbegin = 0.8;
       //if(j==3) fitbegin = 4;
-      double fitend = 10;
+
+      double fitend = 50;
+
+      // Iteratively fit more than once
       for(int k=0; k<2;k++){
-        if(j!=1)
-           hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],hCharge[j]->GetMean()*5.0);
-        else hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend);
+        //if(j!=1)
+           //hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],hCharge[j]->GetMean()*5.0);
+        //else hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend);
+        hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend); // Fit the histogram
         Fideal->GetParameters(par);
-        Fideal->SetParameters(par);
+        Fideal->SetParameters(par); // Set fit parameters for next iteration
       }
 
-      if(j!=1) 
-          hCharge[j]->GetXaxis()->SetRangeUser(0, hCharge[j]->GetMean()*5.0);
-      else{
-          hCharge[j]->GetXaxis()->SetRangeUser(0, fitend);
-          hCharge[j]->GetYaxis()->SetRangeUser(0, 200);
-      }
+      // if(j!=1) 
+      //     hCharge[j]->GetXaxis()->SetRangeUser(0, hCharge[j]->GetMean()*5.0);
+      // else{
+      //     hCharge[j]->GetXaxis()->SetRangeUser(0, fitend);
+      //     hCharge[j]->GetYaxis()->SetRangeUser(0, 200);
+      // }
+
+      hCharge[j]->GetXaxis()->SetRangeUser(0, fitend); // Set axes
 
       Fideal->GetParameters(par);
       //parerr = Fideal->GetParErrors();
