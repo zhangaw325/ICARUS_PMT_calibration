@@ -10,6 +10,12 @@ double IdealResponse(double *x,double *par);
 void FitChargeDistributions(string pmtRow,
 			    char pmt1, char pmt2, char pmt3, char pmt4,
 			    int volt1, int volt2, int volt3, bool led){
+
+  // histogram and fit options
+  int rebinfactor[NCH]={1, 1, 1, 1}; // rebin histograms
+  double fitbeginch[NCH]={1.0,1.0,1.0,1.0};
+  double fitend = 60;
+
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
   TF1* Fideal = new TF1("Fideal",IdealResponse, 0, 500, 4);
@@ -34,10 +40,6 @@ void FitChargeDistributions(string pmtRow,
     cout << rtfilenames[i] << endl;
   }
   const int NCH = 4; // 4 PMTs
- 
-  int rebinfactor[NCH]={1, 1, 1, 1}; // rebin histograms
-  double fitbeginch[NCH]={1.0,1.0,1.0,1.0};
-  double fitend = 60;
 
   string outnameroot = strchimney + strpmt + "gain.root";
   string outnametxt = strchimney + strpmt + "gain_fit.txt";
