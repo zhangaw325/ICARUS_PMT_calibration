@@ -45,7 +45,6 @@ void FitChargeDistributions(string pmtRow,
   fstream foutFit(outnametxt.c_str(),ios::out);
   TH1F* hCharge[3]; // histograms for each canvas
   TCanvas* c[3];
-  char canvasTitle[100];
   char tempname[100];
 
   TFile* files[3];
@@ -57,7 +56,8 @@ void FitChargeDistributions(string pmtRow,
   // Generate 4 canvases and plot the PMT histograms on them
   for(int i = 0; i < 4; i++){
     sprintf(tempname, "c_%d",i);
-    sprintf(canvasTitle,strchimney + "%d",i); // generate canvas title
+    string canvasTitle = strchimney + to_string(i+1);
+    //sprintf(canvasTitle,strchimney + "%d",i); // generate canvas title
     c[i] = new TCanvas(tempname,canvasTitle.c_str(),1400,600); // generate canvas
     c[i]->Divide(3); // divide canvas into 3 pads along the width
 
@@ -66,6 +66,7 @@ void FitChargeDistributions(string pmtRow,
       c[i]->cd(j+1); // switch pads
       sprintf(tempname,"Results/FinalCharge_%d",i); // store string "Results/FinalCharge_%d" in tempname
       hCharge[j] = (TH1F*)files[j]->Get(tempname); // read histogram data from the ROOT file
+      hCharge[j]->SetTitle((voltagestr[j] + "V").c_str());
       hCharge[j]->Rebin(rebinfactor[i]);
       hCharge[j]->SetXTitle("Charge in pC, (10^{7} electrons = 1.6 pC)");
       hCharge[j]->Draw();
