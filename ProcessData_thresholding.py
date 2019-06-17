@@ -22,7 +22,7 @@ import sys # for command-line input
 tempStr = "filelist_"
 filehead = sys.argv[1] # ask user for data directory input
 filelistStr = tempStr + filehead + ".txt"
-rtfileoutputStr = filehead + "_result.root"
+rtfileoutputStr = filehead + "_result_threshold.root"
 # dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/" + filehead + "/"
 print("Analyzing data from " + filehead + ". Files listed in " + filelistStr)
 
@@ -48,12 +48,6 @@ Nwaves = len(open(filelistStr).readlines(  ))/4 # unclear why this is divided by
 print "number of waveforms in this run: ", Nwaves
 #quit()
 
-#print "Waveform static file information:"
-#print pCode[0]
-#print "version number ", vNumber
-#print "number of digits in byte count", ndbc
-#print "number of bytes to EOF ", nbEOF[0]
-#print "number of bytes per point", nbPt
 
 def decode_wfm(filename):
     #awave1 = np.zeros(NSamples)
@@ -264,6 +258,7 @@ def decode_wfm(filename):
         #print "Wfm file check sum",WfmFileCheckSum[0]
         return awave1
         
+
 # main function, process the file the 2nd time
 def main():
 
@@ -325,7 +320,7 @@ def main():
         if ledStatus == False:
             hist = TH1F(name,"",1000,-5,20)
         else:
-            hist = TH1F(name,"",2000,-5,200)
+            hist = TH1F(name,"",1000,-5,100)
         hist.SetXTitle("Charge (pC)")
         hist.SetYTitle("Counts")
         hist.SetLineColor(i+1)
@@ -412,6 +407,7 @@ def main():
             threshold = baseline_mean - Nsigma*baseline_width
             hPedMean_list[ch].Fill(baseline_mean)
             hPedWidth_list[ch].Fill(baseline_width)
+            
             TimeBinOfAmplitude = np.argmin(awave[70:800]) + 70
             if ch == 0 and awave[TimeBinOfAmplitude]<threshold:
                 flag1[waveNb] = True
@@ -435,11 +431,16 @@ def main():
             hAmplitudeBin_list[ch].Fill(TimeBinOfAmplitude)
             #print TimeBinOfAmplitude, awave[TimeBinOfAmplitude]
             hFinalCharge_list[ch].Fill(-1.0*fC)
+
             # search for number of pulses 
-            peakindex = peakutils.peak.indexes(-1.0*awave[0:NSamples],thres=abs(threshold), min_dist=31, thres_abs=True)
+            # peakindex = peakutils.peak.indexes(-1.0*awave[0:NSamples],thres=abs(threshold), min_dist=31, thres_abs=True)
+            peakindex = peakutils.peak.indexes(-1.0*awave[0:NSamples],thres=2, min_dist=31, thres_abs=True)
+
             for pulse_i in range(len(peakindex)):
+            	# Pass peaks greater than 2*Nsigma away from the baseline mean
                 if awave[peakindex[pulse_i]] > (baseline_mean - 2.0*Nsigma*baseline_width):
                     continue
+
                 hPulseTimeDist_list[ch].Fill(peakindex[pulse_i]) #+TimeBinOfAmplitude+200
                 hPulseAmplitudeVsTime_list[ch].Fill(peakindex[pulse_i], -1000.0*(awave[peakindex[pulse_i]]-baseline_mean))
                 #determine the pulse width
@@ -494,7 +495,7 @@ def main():
     f.close()
     resultsDir.cd()
     for i in range(0,NCH,1):
-        # fit the charge distributions with Poisson distribution plus exponential background
+        # fit the charge distributions with Poisson distribution plus exponetional background
         hFinalCharge_list[i].Write()
     for i in range(0,NCH,1):
         hAmplitude_list[i].Write()
