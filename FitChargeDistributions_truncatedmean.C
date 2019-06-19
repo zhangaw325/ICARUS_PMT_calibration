@@ -1,5 +1,6 @@
 #include "TH1.h"
 #include "TCanvas.h"
+#include "TF1.h"
 
 //#include "Fit_Spe.C" // the fit function is defined in this file
 
@@ -8,7 +9,7 @@ double PI = TMath::Pi();
 double IdealResponse(double *x,double *par);
 Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3);
 
-void FitChargeDistributions(string pmtRow,
+void FitChargeDistributions_truncatedmean(string pmtRow,
 			    char pmt1, char pmt2, char pmt3, char pmt4,
 			    int volt1, int volt2, int volt3, bool led){
 
@@ -83,7 +84,7 @@ void FitChargeDistributions(string pmtRow,
       Fideal->SetParLimits(2,0.1,10);
       Fideal->SetParLimits(3,0.1,20000);
 
-      Double_t hist_mean = truncatedMean(hCharge[j]);
+      Double_t hist_mean = truncatedMean(hCharge[j],10);
       Fideal->SetParameter(1,hist_mean);
 
       // Iteratively fit more than once
@@ -151,11 +152,11 @@ Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3)
     Double_t new_start = mean - n_rejection_stddevs * stddev;
     Double_t new_end = mean + n_rejection_stddevs * stddev;
 
-    hist.GetXaxis()->SetRangeUser(new_start, new_end);
+    hist->GetXaxis()->SetRangeUser(new_start, new_end);
   }
 
   // Zoom histogram back out
-  hist.GetXaxis()->UnZoom();
+  hist->GetXaxis()->UnZoom();
 
   return mean;
 }
