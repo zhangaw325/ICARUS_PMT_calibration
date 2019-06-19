@@ -139,7 +139,7 @@ Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3)
   Double_t stddev = 0.;
 
   // Zoom out
-  hist.GetXaxis()->UnZoom();
+  hist->GetXaxis()->UnZoom();
 
   // Calculate truncated mean
   for(int i = 0; i < n_iterations; i++){
