@@ -213,10 +213,12 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     // fit FCN function directly
     // (specify optionally data size and flag to indicate that is a chi2 fit)
     fitter.FitFCN(NPAR,globalChi2,0, chargeData[0].Size() + chargeData[1].Size() + chargeData[2].Size() ,true);
-    ROOT::Fit::FitResult result = fitter.Result();
+    ROOT::Fit::FitResult result;
+    for(int j = 0; j < 3; j++){
+      result = fitter.Result();
+      // fitter updates fit parameters after fitting
+    }
     result.Print(std::cout);
-
-    // fitter updates fit parameters after fitting
 
     // display results
     fit_ideal_1->SetFitResult(result,ipar1);
@@ -238,9 +240,9 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     }
 
     // write parameters to output txt file
-    Fideal->GetParameters(par);
-    //parerr = Fideal->GetParErrors();
+
     // Voltage 1
+    fit_ideal_1->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[0]<<"\tchID\t"<<i
             <<"\t"<<par[0]<<"\t"<<fit_ideal_1->GetParError(0)
             <<"\t"<<par[1]<<"\t"<<fit_ideal_1->GetParError(1)
@@ -251,6 +253,7 @@ void FitChargeDistributions_simultaneous(string pmtRow,
             <<endl;
 
     // Voltage 2
+    fit_ideal_2->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[1]<<"\tchID\t"<<i
             <<"\t"<<par[0]<<"\t"<<fit_ideal_2->GetParError(0)
             <<"\t"<<par[1]<<"\t"<<fit_ideal_2->GetParError(1)
@@ -261,6 +264,7 @@ void FitChargeDistributions_simultaneous(string pmtRow,
             <<endl;
 
     // Voltage 3
+    fit_ideal_3->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[2]<<"\tchID\t"<<i
             <<"\t"<<par[0]<<"\t"<<fit_ideal_3->GetParError(0)
             <<"\t"<<par[1]<<"\t"<<fit_ideal_3->GetParError(1)
