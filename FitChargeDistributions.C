@@ -13,7 +13,7 @@ void FitChargeDistributions(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rebinfactor[NCH]={5, 5, 5, 5}; // rebin histograms
+  int rebinfactor[NCH]={5,5, 5, 5}; // rebin histograms
   double fitbeginch[NCH]={1.0,1.0,1.0,1.0};
   double fitend = 60;
 
@@ -27,6 +27,7 @@ void FitChargeDistributions(string pmtRow,
 
   // process 3 files in a batch
   string rtfilenames[3];
+  string resultnames[3];
   string strchimney = pmtRow + "_PMT_";
   string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
   //string voltagestr[3]={"1440","1470","1500"};
@@ -38,6 +39,7 @@ void FitChargeDistributions(string pmtRow,
     ledstr = "Off";
   for(int i=0; i<3; i++){
     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
+    resultnames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + ".pdf";
     cout << rtfilenames[i] << endl;
   }
 
@@ -74,7 +76,7 @@ void FitChargeDistributions(string pmtRow,
       hCharge[j]->Draw();
 
       // Set initial fit parameters
-      //Fideal->SetParameter(1,1.6);
+      //Fideal->SetParameter(1,10.0);
       //Fideal->SetParameter(2,1.6*0.4);
       //Fideal->SetParameter(3,hCharge[j]->Integral());
       Fideal->SetParLimits(0,0.1,100);
@@ -83,17 +85,37 @@ void FitChargeDistributions(string pmtRow,
       Fideal->SetParLimits(3,0.1,20000);
 
       // Iteratively fit more than once
-      //for(int k=0; k<2;k++){
-        //hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend); // Fit the histogram
-        //Fideal->GetParameters(par);
-        //Fideal->SetParameters(par); // Set fit parameters for next iteration
-      //}
+      for(int k=0; k<2;k++){
+        hCharge[j]->Fit("Fideal","RQ","",fitbeginch[i],fitend); // Fit the histogram
+        Fideal->GetParameters(par);
+        Fideal->SetParameters(par); // Set fit parameters for next iteration
+      }
+
       
-      //hCharge[j]->Fit("expo","","",fitbeginch[j],fitend);
-      hCharge[j]->Fit("Fideal","","",fitbeginch[j],fitend);
+      hCharge[j]->Fit("expo","","",fitbeginch[i],fitend);
+      hCharge[j]->Fit("Fideal","","",fitbeginch[i],fitend);
+      //hCharge[j]->Fit("expo","","",fitbeginch[i],fitend);
+      //hCharge[j]->Fit("Fideal","","",fitbeginch[i],fitend);
       
       hCharge[j]->GetXaxis()->SetRangeUser(0, fitend); // Set axes
 
+      if(i == 0 && (j== 1 ||j == 2)){
+      Fideal->SetParameters(4.873,2.69,0.5868,10800);
+      hCharge[j]->Fit("Fideal","R","",1.0,fitend);
+     }
+
+      //if(i == 1 && (j == 0)){
+      //	Fideal->SetParameters(11.7,1.601,.4458,10500);
+      //	hCharge[j]->Fit("Fideal","R","",1.0,fitend);
+      //}
+
+      if(i == 2 && (j == 0||j==1)){
+      	Fideal->SetParameters(15.04,1.232,1.099,10500);
+      	hCharge[j]->Fit("Fideal","R","",1.0,fitend);
+      }
+
+      
+	
       // write parameters to output txt file
       Fideal->GetParameters(par);
       //parerr = Fideal->GetParErrors();
@@ -109,7 +131,9 @@ void FitChargeDistributions(string pmtRow,
 
     // write results to output ROOT file
     outROOTfile->cd();
-    c[i]->Write();
+    //c[i]->Write();
+    //c[i]->Draw;
+    c[i]->Print(resultnames[i].c_str(), "pdf");
   }
 
   // Read each of the three output ROOT files and generate 3 canvases
@@ -138,11 +162,11 @@ void FitChargeDistributions(string pmtRow,
   //     Fideal->SetParLimits(3,0.1,20000);
 
   //     // Iteratively fit more than once
-  //     for(int k=0; k<5;k++){
-  //       hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend); // Fit the histogram
-  //       Fideal->GetParameters(par);
-  //       Fideal->SetParameters(par); // Set fit parameters for next iteration
-  //     }
+  // for(int k=0; k<5;k++){
+     // hCharge[j]->Fit("Fideal","RQ","",fitbeginch[j],fitend); // Fit the histogram
+	 // Fideal->GetParameters(par);
+	 // Fideal->SetParameters(par); // Set fit parameters for next iteration
+	 // }
 
   //     hCharge[j]->GetXaxis()->SetRangeUser(0, fitend); // Set axes
 
