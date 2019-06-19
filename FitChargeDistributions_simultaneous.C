@@ -216,6 +216,8 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     ROOT::Fit::FitResult result = fitter.Result();
     result.Print(std::cout);
 
+    // fitter updates fit parameters after fitting
+
     // display results
     fit_ideal_1->SetFitResult(result,ipar1);
     fit_ideal_1->SetRange(range().first, range().second);
@@ -226,7 +228,7 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     hCharge[1]->GetListOfFunctions()->Add(fit_ideal_2);
 
     fit_ideal_3->SetFitResult(result, ipar3);
-    fit_ideal_2->SetRange(range().first, range().second);
+    fit_ideal_3->SetRange(range().first, range().second);
     hCharge[2]->GetListOfFunctions()->Add(fit_ideal_3);
 
     for(int j = 0; j < 3; j++){
@@ -234,6 +236,39 @@ void FitChargeDistributions_simultaneous(string pmtRow,
       hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[i]);
       hCharge[j]->Draw();
     }
+
+    // write parameters to output txt file
+    Fideal->GetParameters(par);
+    //parerr = Fideal->GetParErrors();
+    // Voltage 1
+    foutFit<<"voltage\t"<<voltagestr[0]<<"\tchID\t"<<i
+            <<"\t"<<par[0]<<"\t"<<fit_ideal_1->GetParError(0)
+            <<"\t"<<par[1]<<"\t"<<fit_ideal_1->GetParError(1)
+            <<"\t"<<par[2]<<"\t"<<fit_ideal_1->GetParError(2)
+            <<"\t"<<fit_ideal_1->GetChisquare()
+            <<"\t"<<fit_ideal_1->GetNDF()
+            <<"\t"<<fit_ideal_1->GetProb()
+            <<endl;
+
+    // Voltage 2
+    foutFit<<"voltage\t"<<voltagestr[1]<<"\tchID\t"<<i
+            <<"\t"<<par[0]<<"\t"<<fit_ideal_2->GetParError(0)
+            <<"\t"<<par[1]<<"\t"<<fit_ideal_2->GetParError(1)
+            <<"\t"<<par[2]<<"\t"<<fit_ideal_2->GetParError(2)
+            <<"\t"<<fit_ideal_2->GetChisquare()
+            <<"\t"<<fit_ideal_2->GetNDF()
+            <<"\t"<<fit_ideal_2->GetProb()
+            <<endl;
+
+    // Voltage 3
+    foutFit<<"voltage\t"<<voltagestr[2]<<"\tchID\t"<<i
+            <<"\t"<<par[0]<<"\t"<<fit_ideal_3->GetParError(0)
+            <<"\t"<<par[1]<<"\t"<<fit_ideal_3->GetParError(1)
+            <<"\t"<<par[2]<<"\t"<<fit_ideal_3->GetParError(2)
+            <<"\t"<<fit_ideal_3->GetChisquare()
+            <<"\t"<<fit_ideal_3->GetNDF()
+            <<"\t"<<fit_ideal_3->GetProb()
+            <<endl;
 
     //*************************
     // End fit
@@ -279,17 +314,17 @@ void FitChargeDistributions_simultaneous(string pmtRow,
       
     //   hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[i]); // Set axes
 
-    //   // write parameters to output txt file
-    //   Fideal->GetParameters(par);
-    //   //parerr = Fideal->GetParErrors();
-    //   foutFit<<"voltage\t"<<voltagestr[j]<<"\tchID\t"<<i
-    //          <<"\t"<<par[0]<<"\t"<<Fideal->GetParError(0)
-    //          <<"\t"<<par[1]<<"\t"<<Fideal->GetParError(1)
-    //          <<"\t"<<par[2]<<"\t"<<Fideal->GetParError(2)
-    //          <<"\t"<<Fideal->GetChisquare()
-    //          <<"\t"<<Fideal->GetNDF()
-    //          <<"\t"<<Fideal->GetProb()
-    //          <<endl;
+      // // write parameters to output txt file
+      // Fideal->GetParameters(par);
+      // //parerr = Fideal->GetParErrors();
+      // foutFit<<"voltage\t"<<voltagestr[j]<<"\tchID\t"<<i
+      //        <<"\t"<<par[0]<<"\t"<<Fideal->GetParError(0)
+      //        <<"\t"<<par[1]<<"\t"<<Fideal->GetParError(1)
+      //        <<"\t"<<par[2]<<"\t"<<Fideal->GetParError(2)
+      //        <<"\t"<<Fideal->GetChisquare()
+      //        <<"\t"<<Fideal->GetNDF()
+      //        <<"\t"<<Fideal->GetProb()
+      //        <<endl;
 
     //   //***************************
     //   // End fit
@@ -330,7 +365,7 @@ Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3)
     mean = hist->GetMean(1);
     stddev = hist->GetStdDev(1);
 
-    cout << mean << endl;
+    //cout << mean << endl;
 
     // Truncate
     Double_t new_start = mean - n_rejection_stddevs * stddev;
