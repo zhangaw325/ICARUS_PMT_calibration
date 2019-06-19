@@ -166,14 +166,14 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     // get bin data
     ROOT::Fit::BinData chargeData[3]; 
 
-    for(int i = 0; i < 3; i++){
-      ROOT::Fit::FillData(chargeData[i], hCharge[i]);
+    for(int j = 0; j < 3; j++){
+      ROOT::Fit::FillData(chargeData[j], hCharge[j]);
     }
 
     // create chi2 function
-    ROOT::Fit::Chi2Function chi2_1(data[1], wf1);
-    ROOT::Fit::Chi2Function chi2_2(data[2], wf2);
-    ROOT::Fit::Chi2Function chi2_3(data[3], wf3);
+    ROOT::Fit::Chi2Function chi2_1(chargeData[0], wf1);
+    ROOT::Fit::Chi2Function chi2_2(chargeData[1], wf2);
+    ROOT::Fit::Chi2Function chi2_3(chargeData[2], wf3);
     GlobalChi2 globalChi2(chi2_1, chi2_2, chi2_3);
 
     // create fitter
@@ -182,13 +182,13 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     Double_t par0[NPAR] = { hist_mean_1,
                             1.6,
                             1.6*0.4,
+                            hCharge[0]->Integral(),
+                            1.6,
+                            1.6*0.4,
                             hCharge[1]->Integral(),
                             1.6,
                             1.6*0.4,
-                            hCharge[2]->Integral(),
-                            1.6,
-                            1.6*0.4,
-                            hCharge[3]->Integral()}; // starting values
+                            hCharge[2]->Integral()}; // starting values
 
     // set ranges on fit parameters
     fitter.Config().SetParamsSettings(NPAR, par0);
@@ -219,15 +219,15 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     // display results
     fit_ideal_1->SetFitResult(result,ipar1);
     fit_ideal_1->SetRange(range().first, range().second);
-    hCharge[1]->GetListOfFunctions()->Add(fit_ideal_1);
+    hCharge[0]->GetListOfFunctions()->Add(fit_ideal_1);
 
     fit_ideal_2->SetFitResult(result,ipar2);
     fit_ideal_2->SetRange(range().first, range().second);
-    hCharge[2]->GetListOfFunctions()->Add(fit_ideal_2);
+    hCharge[1]->GetListOfFunctions()->Add(fit_ideal_2);
 
     fit_ideal_3->SetFitResult(result, ipar3);
     fit_ideal_2->SetRange(range().first, range().second);
-    hCharge[3]->GetListOfFunctions()->Add(fit_ideal_3);
+    hCharge[2]->GetListOfFunctions()->Add(fit_ideal_3);
 
     for(int j = 0; j < 3; j++){
       c[i]->cd(j+1);
