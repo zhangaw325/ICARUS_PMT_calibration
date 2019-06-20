@@ -91,25 +91,25 @@ void FitChargeDistributions(string pmtRow,
 
   // process 3 files in a batch
   string rtfilenames[3];
-  string resultnames[3];
+  string resultnames[4];
+  double channelnames[4] = {0,1,2,3};
   string strchimney = pmtRow + "_PMT_";
   string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
-  //string voltagestr[3]={"1440","1470","1500"};
   string voltagestr[3] = {to_string(volt1), to_string(volt2), to_string(volt3)};
   string ledstr;
   if(led)
     ledstr = "On";
   else
     ledstr = "Off";
-
+  
   for(int i=0; i<3; i++){
     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
     cout << rtfilenames[i] << endl;
   }
-
-  for(int i = 0; i < 4; i++){
-  	resultnames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + ".pdf";
-  	cout << resultnames[i] << endl;
+  
+  for(int i=0;i<4; i++){
+    resultnames[i]  = strchimney + strpmt + "CH" + channelnames[i] + "_" + "Led" + ledstr + ".pdf";
+    cout << resultnames[i] <<endl;
   }
 
   string outnameroot = strchimney + strpmt + "gain.root";
