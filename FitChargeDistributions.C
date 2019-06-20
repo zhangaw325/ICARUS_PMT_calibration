@@ -101,10 +101,15 @@ void FitChargeDistributions(string pmtRow,
     ledstr = "On";
   else
     ledstr = "Off";
+
   for(int i=0; i<3; i++){
     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
-    resultnames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + ".pdf";
     cout << rtfilenames[i] << endl;
+  }
+
+  for(int i = 0; i < 4; i++){
+  	resultnames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + ".pdf";
+  	cout << resultnames[i] << endl;
   }
 
   string outnameroot = strchimney + strpmt + "gain.root";
@@ -112,7 +117,7 @@ void FitChargeDistributions(string pmtRow,
   TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
   fstream foutFit(outnametxt.c_str(),ios::out);
   TH1F* hCharge[3]; // histograms for each canvas
-  TCanvas* c[3];
+  TCanvas* c[4];
   char tempname[100];
 
   TFile* files[3];
