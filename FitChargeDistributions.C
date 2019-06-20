@@ -281,63 +281,6 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     // End fit
     //*************************
 
-    // Plot the histograms
-    // for(int j = 0; j<3; j++){
-
-    //   c[i]->cd(j+1); // switch pads
-    //   sprintf(tempname,"Results/FinalCharge_%d",i); // store string "Results/FinalCharge_%d" in tempname
-    //   hCharge[j] = (TH1F*)files[j]->Get(tempname); // read histogram data from the ROOT file
-    //   hCharge[j]->SetTitle((voltagestr[j] + "V").c_str());
-    //   hCharge[j]->Rebin(rebinfactor[i]);
-    //   hCharge[j]->SetXTitle("Charge in pC, (10^{7} electrons = 1.6 pC)");
-    //   hCharge[j]->Draw();
-
-    //   //***************************
-    //   // Begin fit
-    //   //***************************
-
-    //   // Set initial fit parameters
-    //   Fideal->SetParameter(1,1.6);
-    //   Fideal->SetParameter(2,1.6*0.4);
-    //   Fideal->SetParameter(3,hCharge[j]->Integral());
-
-    //   Fideal->SetParLimits(0,0.1,100);
-    //   Fideal->SetParLimits(1,0.1,10);
-    //   Fideal->SetParLimits(2,0.1,10);
-    //   Fideal->SetParLimits(3,0.1,20000);
-
-    //   Double_t hist_mean = truncatedMean(hCharge[j],10);
-    //   Fideal->SetParameter(0,hist_mean);
-
-    //   // Iteratively fit more than once
-    //   for(int k=0; k<2;k++){
-    //     hCharge[j]->Fit("Fideal","RQ","",fitbeginch[i],fitendch[i]); // Fit the histogram
-    //     Fideal->GetParameters(par);
-    //     Fideal->SetParameters(par); // Set fit parameters for next iteration
-    //   }
-      
-    //   //hCharge[j]->Fit("expo","","",fitbeginch[i],fitendch[i]);
-    //   hCharge[j]->Fit("Fideal","","",fitbeginch[i],fitendch[i]);
-      
-    //   hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[i]); // Set axes
-
-      // // write parameters to output txt file
-      // Fideal->GetParameters(par);
-      // //parerr = Fideal->GetParErrors();
-      // foutFit<<"voltage\t"<<voltagestr[j]<<"\tchID\t"<<i
-      //        <<"\t"<<par[0]<<"\t"<<Fideal->GetParError(0)
-      //        <<"\t"<<par[1]<<"\t"<<Fideal->GetParError(1)
-      //        <<"\t"<<par[2]<<"\t"<<Fideal->GetParError(2)
-      //        <<"\t"<<Fideal->GetChisquare()
-      //        <<"\t"<<Fideal->GetNDF()
-      //        <<"\t"<<Fideal->GetProb()
-      //        <<endl;
-
-    //   //***************************
-    //   // End fit
-    //   //***************************
-    // }
-
     // write results to output ROOT file
     outROOTfile->cd();
     //c[i]->Write();
