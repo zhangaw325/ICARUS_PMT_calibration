@@ -71,7 +71,7 @@ struct GlobalChi2 {
    const  ROOT::Math::IMultiGenFunction * fChi2_3;
 };
 
-void FitChargeDistributions_simultaneous(string pmtRow,
+void FitChargeDistributions(string pmtRow,
 			    char pmt1, char pmt2, char pmt3, char pmt4,
 			    int volt1, int volt2, int volt3, bool led){
 
