@@ -71,7 +71,7 @@ struct GlobalChi2 {
    const  ROOT::Math::IMultiGenFunction * fChi2_3;
 };
 
-void FitChargeDistributions_simultaneous(string pmtRow,
+void FitChargeDistributions(string pmtRow,
 			    char pmt1, char pmt2, char pmt3, char pmt4,
 			    int volt1, int volt2, int volt3, bool led){
 
@@ -91,7 +91,8 @@ void FitChargeDistributions_simultaneous(string pmtRow,
 
   // process 3 files in a batch
   string rtfilenames[3];
-  string resultnames[3];
+  string resultnames[4];
+  double channelnames[4] = {0,1,2,3};
   string strchimney = pmtRow + "_PMT_";
   string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
   //string voltagestr[3]={"1440","1470","1500"};
@@ -103,9 +104,13 @@ void FitChargeDistributions_simultaneous(string pmtRow,
     ledstr = "Off";
   for(int i=0; i<3; i++){
     rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
-    resultnames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + ".pdf";
     cout << rtfilenames[i] << endl;
-  }
+    }
+  for(int i=0;i<4; i++){
+    resultnames[i]  = strchimney + strpmt + "CH" + channelnames[i] + "_" + "Led" + ledstr + ".pdf";
+    cout << resultnames[i] <<endl;
+//    break;
+    }
 
   string outnameroot = strchimney + strpmt + "gain.root";
   string outnametxt = strchimney + strpmt + "gain_fit.txt";
@@ -240,7 +245,7 @@ void FitChargeDistributions_simultaneous(string pmtRow,
       c[i]->cd(j+1);
       hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[i]);
       hCharge[j]->Draw();
-    }
+      }
 
     // write parameters to output txt file
 
@@ -340,12 +345,14 @@ void FitChargeDistributions_simultaneous(string pmtRow,
 
     // write results to output ROOT file
     outROOTfile->cd();
-    //c[i]->Write();
+
+    c[i]->Write();
     c[i]->Print(resultnames[i].c_str(),"pdf");
   }
 
   // close output ROOT file
   outROOTfile->Close();
+  //c[i]->Print(resultnames[i].c_str(),"pdf");
 }
 
 
