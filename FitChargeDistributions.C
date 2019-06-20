@@ -283,7 +283,7 @@ void FitChargeDistributions_simultaneous(string pmtRow,
 
     // write results to output ROOT file
     outROOTfile->cd();
-    //c[i]->Write();
+    c[i]->Write();
     c[i]->Print(resultnames[i].c_str(),"pdf");
   }
 
