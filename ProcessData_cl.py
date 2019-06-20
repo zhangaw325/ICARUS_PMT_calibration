@@ -325,7 +325,7 @@ def main():
         if ledStatus == False:
             hist = TH1F(name,"",1000,-5,20)
         else:
-            hist = TH1F(name,"",1000,-5,100)
+            hist = TH1F(name,"",2000,-5,200)
         hist.SetXTitle("Charge (pC)")
         hist.SetYTitle("Counts")
         hist.SetLineColor(i+1)
@@ -429,7 +429,7 @@ def main():
             hPulseStartTime_list[ch].Fill(pulsestartbin-1)                
             #else:
             #    sumcharge = np.sum(awave[172-13:172+23])
-            fC = (sumcharge-baseline_mean*(23+13+1))*QFactor # convert charge involving the 50 Ohm impedience
+            fC = (sumcharge-baseline_mean*(23+13+1))*QFactor # convert charge involving the 50 Ohm impedance
             #if awave[TimeBinOfAmplitude] < threshold:
             hAmplitude_list[ch].Fill(-1000.0*(awave[TimeBinOfAmplitude]-baseline_mean))
             hAmplitudeBin_list[ch].Fill(TimeBinOfAmplitude)
@@ -494,7 +494,7 @@ def main():
     f.close()
     resultsDir.cd()
     for i in range(0,NCH,1):
-        # fit the charge distributions with Poisson distribution plus exponetional background
+        # fit the charge distributions with Poisson distribution plus exponential background
         hFinalCharge_list[i].Write()
     for i in range(0,NCH,1):
         hAmplitude_list[i].Write()
