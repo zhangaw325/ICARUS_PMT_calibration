@@ -21,23 +21,29 @@
 // constants
 double PI = TMath::Pi();
 // define which parameters correspond to which indices
-const int NPAR = 10;
-int ipar1[4] = {  0, // common mu
+const int NPAR = 16;
+int ipar1[6] = {  0, // common mu
                   1, // q for hist 1
                   2, // sigma for hist 1
-                  3  // amplitude for hist 1
+                  3, // amplitude for hist 1
+		  4, // amplitude of background exponential for hist 1
+		  5  // coefficient of exponential for hist 1
 };
 
-int ipar2[4] = {  0, // common mu
-                  4, // q for hist 2
-                  5, // sigma for hist 2
-                  6  // amplitude for hist 2
+int ipar2[6] = {  0, // common mu
+                  6, // q for hist 2
+                  7, // sigma for hist 2
+                  8, // amplitude for hist 2
+		  9, // amplitude of background exponential for hist 2
+		  10 // coefficient of exponential for hist 2
 };
 
-int ipar3[4] = {  0, // common mu
-                  7, // q for hist 3
-                  8, // sigma for hist 3
-                  9  // amplitude for hist 3
+int ipar3[6] = {  0,  // common mu
+                  11, // q for hist 3
+                  12, // sigma for hist 3
+                  13, // amplitude for hist 3
+		  14, // amplitude of background exponential for hist 3
+		  15  // coefficient of exponential for hist 3
 };
 
 // function declarations
@@ -58,17 +64,17 @@ struct GlobalChi2 {
     double p3[4];
 
     for (int i = 0; i < 4; ++i){
-        p1[i] = par[ipar1[i]];
-        p2[i] = par[ipar2[i]];
-        p3[i] = par[ipar3[i]];
+      p1[i] = par[ipar1[i]];
+      p2[i] = par[ipar2[i]];
+      p3[i] = par[ipar3[i]];
     }
 
     return (*fChi2_1)(p1) + (*fChi2_2)(p2) + (*fChi2_3)(p3);
   }
 
-   const  ROOT::Math::IMultiGenFunction * fChi2_1;
-   const  ROOT::Math::IMultiGenFunction * fChi2_2;
-   const  ROOT::Math::IMultiGenFunction * fChi2_3;
+  const  ROOT::Math::IMultiGenFunction * fChi2_1;
+  const  ROOT::Math::IMultiGenFunction * fChi2_2;
+  const  ROOT::Math::IMultiGenFunction * fChi2_3;
 };
 
 void FitChargeDistributions(string pmtRow,
@@ -78,16 +84,16 @@ void FitChargeDistributions(string pmtRow,
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
   int rebinfactor[NCH]={5, 5, 5, 5}; // rebin histograms
-  double fitbeginch[NCH]={1.0,1.0,1.0,1.0}; // fit start locations
-  double fitendch[NCH] = {60,60,60,60}; // fit end locations
+  double fitbeginch[NCH]={0.0,0.0,0.0,0.0}; // fit start locations
+  double fitendch[NCH] = {90,90,90,90}; // fit end locations
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
   TF1* Fideal = new TF1("Fideal",IdealResponse, 0, 500, 4);
   Fideal->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
   Fideal->SetLineColor(2); Fideal->SetLineStyle(1);
-  double par[4];
-  double parerr[4];
+  double par[6];
+  double parerr[6];
 
   // process 3 files in a batch
   string rtfilenames[3];
@@ -149,15 +155,15 @@ void FitChargeDistributions(string pmtRow,
 
     // generate fit functions
     TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, 0, 500, 4);
-    fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+    fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
     fit_ideal_1->SetLineColor(2);
     fit_ideal_1->SetLineStyle(1);
     TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, 0, 500, 4);
-    fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+    fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
     fit_ideal_2->SetLineColor(2);
     fit_ideal_2->SetLineStyle(1);
     TF1* fit_ideal_3 = new TF1("fit_ideal_1",IdealResponse, 0, 500, 4);
-    fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+    fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
     fit_ideal_3->SetLineColor(2);
     fit_ideal_3->SetLineStyle(1);
 
@@ -191,28 +197,42 @@ void FitChargeDistributions(string pmtRow,
                             1.6,
                             1.6*0.4,
                             hCharge[0]->Integral(),
+			    600,
+			    7,
                             1.6,
                             1.6*0.4,
                             hCharge[1]->Integral(),
+			    600,
+			    7,
                             1.6,
                             1.6*0.4,
-                            hCharge[2]->Integral()}; // starting values
+                            hCharge[2]->Integral(),
+			    600,
+			    7}; // starting values
 
     // set ranges on fit parameters
     fitter.Config().SetParamsSettings(NPAR, par0);
 
     fitter.Config().ParSettings(0).SetLimits(0.1, 100);
     // q
-    for(int j = 1; j < 8; j += 3){
+    for(int j = 1; j < 11; j += 5){
       fitter.Config().ParSettings(j).SetLimits(0.1, 10);
     }
     // sigma
-    for(int j = 2; j < 9; j += 3){
+    for(int j = 2; j < 12; j += 5){
       fitter.Config().ParSettings(j).SetLimits(0.1, 10);
     }
     // amplitude
-    for(int j = 3; j < 10; j += 3){
+    for(int j = 3; j < 13; j += 5){
       fitter.Config().ParSettings(j).SetLimits(0.1, 20000);
+    }
+    // exponential amplitude
+    for(int j = 4; j < 14; j += 5){
+      fitter.Config().ParSettings(j).SetLimits(0.1, 3000);
+    }
+    // exponential coefficient
+    for(int j = 5; j < 15; j += 5){
+      fitter.Config().ParSettings(j).SetLimits(0.1, 30);
     }
 
     fitter.Config().MinimizerOptions().SetPrintLevel(0);
@@ -252,35 +272,44 @@ void FitChargeDistributions(string pmtRow,
     // Voltage 1
     fit_ideal_1->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[0]<<"\tchID\t"<<i
-            <<"\t"<<par[0]<<"\t"<<fit_ideal_1->GetParError(0)
-            <<"\t"<<par[1]<<"\t"<<fit_ideal_1->GetParError(1)
-            <<"\t"<<par[2]<<"\t"<<fit_ideal_1->GetParError(2)
-            <<"\t"<<fit_ideal_1->GetChisquare()
-            <<"\t"<<fit_ideal_1->GetNDF()
-            <<"\t"<<fit_ideal_1->GetProb()
-            <<endl;
-
+	   <<"\t"<<par[0]<<"\t"<<fit_ideal_1->GetParError(0)
+	   <<"\t"<<par[1]<<"\t"<<fit_ideal_1->GetParError(1)
+	   <<"\t"<<par[2]<<"\t"<<fit_ideal_1->GetParError(2)
+	   <<"\t"<<par[3]<<"\t"<<fit_ideal_1->GetParError(3)
+	   <<"\t"<<par[4]<<"\t"<<fit_ideal_1->GetParError(4)
+	   <<"\t"<<par[5]<<"\t"<<fit_ideal_1->GetParError(5)
+	   <<"\t"<<fit_ideal_1->GetChisquare()
+	   <<"\t"<<fit_ideal_1->GetNDF()
+	   <<"\t"<<fit_ideal_1->GetProb()
+	   <<endl;
+    
     // Voltage 2
     fit_ideal_2->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[1]<<"\tchID\t"<<i
-            <<"\t"<<par[0]<<"\t"<<fit_ideal_2->GetParError(0)
-            <<"\t"<<par[1]<<"\t"<<fit_ideal_2->GetParError(1)
-            <<"\t"<<par[2]<<"\t"<<fit_ideal_2->GetParError(2)
-            <<"\t"<<fit_ideal_2->GetChisquare()
-            <<"\t"<<fit_ideal_2->GetNDF()
-            <<"\t"<<fit_ideal_2->GetProb()
-            <<endl;
+	   <<"\t"<<par[0]<<"\t"<<fit_ideal_2->GetParError(0)
+	   <<"\t"<<par[1]<<"\t"<<fit_ideal_2->GetParError(1)
+	   <<"\t"<<par[2]<<"\t"<<fit_ideal_2->GetParError(2)
+	   <<"\t"<<par[3]<<"\t"<<fit_ideal_2->GetParError(3)
+	   <<"\t"<<par[4]<<"\t"<<fit_ideal_2->GetParError(4)
+	   <<"\t"<<par[5]<<"\t"<<fit_ideal_2->GetParError(5)   
+	   <<"\t"<<fit_ideal_2->GetChisquare()
+	   <<"\t"<<fit_ideal_2->GetNDF()
+	   <<"\t"<<fit_ideal_2->GetProb()
+	   <<endl;
 
     // Voltage 3
     fit_ideal_3->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[2]<<"\tchID\t"<<i
-            <<"\t"<<par[0]<<"\t"<<fit_ideal_3->GetParError(0)
-            <<"\t"<<par[1]<<"\t"<<fit_ideal_3->GetParError(1)
-            <<"\t"<<par[2]<<"\t"<<fit_ideal_3->GetParError(2)
-            <<"\t"<<fit_ideal_3->GetChisquare()
-            <<"\t"<<fit_ideal_3->GetNDF()
-            <<"\t"<<fit_ideal_3->GetProb()
-            <<endl;
+	   <<"\t"<<par[0]<<"\t"<<fit_ideal_3->GetParError(0)
+	   <<"\t"<<par[1]<<"\t"<<fit_ideal_3->GetParError(1)
+	   <<"\t"<<par[2]<<"\t"<<fit_ideal_3->GetParError(2)
+	   <<"\t"<<par[3]<<"\t"<<fit_ideal_3->GetParError(3)
+	   <<"\t"<<par[4]<<"\t"<<fit_ideal_3->GetParError(4)
+	   <<"\t"<<par[5]<<"\t"<<fit_ideal_3->GetParError(5)
+	   <<"\t"<<fit_ideal_3->GetChisquare()
+	   <<"\t"<<fit_ideal_3->GetNDF()
+	   <<"\t"<<fit_ideal_3->GetProb()
+	   <<endl;
 
     //*************************
     // End fit
@@ -298,15 +327,17 @@ void FitChargeDistributions(string pmtRow,
 
 
 double IdealResponse(double *x,double *par){
-    double mu = par[0];
-    double q = par[1];
-    double sigma = par[2];
-    double amplitude = par[3];
-    double sum=0;
-    for(Int_t n=1; n<50; n++){
-        sum += TMath::Power(mu,n)*TMath::Exp(-1.0*mu)/TMath::Factorial(n)*TMath::Exp(-1.0*(x[0]-q*n)*(x[0]-q*n)/(2.0*n*sigma*sigma))/(sigma*TMath::Sqrt(2.0*PI*n));
-    }
-    return sum*amplitude;
+  double mu = par[0];
+  double q = par[1];
+  double sigma = par[2];
+  double amplitude = par[3];
+  double expAmp = par[4];
+  double expCoef = par[5];
+  double sum=0;
+  for(Int_t n=1; n<50; n++){
+    sum += TMath::Power(mu,n)*TMath::Exp(-1.0*mu)/TMath::Factorial(n)*TMath::Exp(-1.0*(x[0]-q*n)*(x[0]-q*n)/(2.0*n*sigma*sigma))/(sigma*TMath::Sqrt(2.0*PI*n)) + expAmp*TMath::Exp(-1.0*expCoef*x);
+  }
+  return sum*amplitude;
 }
 
 Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3){
