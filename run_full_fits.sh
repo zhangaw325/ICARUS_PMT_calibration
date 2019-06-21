@@ -8,7 +8,7 @@ while read l1; do
 	#save info into variables
 	chimney=$(echo $l1 | cut -f1 -d_)
 	pmt0=$(echo $l1 | cut -f3 -d_)
-	pmm1=$(echo $l1 | cut -f4 -d_)
+	pmt1=$(echo $l1 | cut -f4 -d_)
 	pmt2=$(echo $l1 | cut -f5 -d_)
 	pmt3=$(echo $l1 | cut -f6 -d_)
 	volt1Raw=$(echo $l1 | cut -f7 -d_)
@@ -28,6 +28,11 @@ while read l1; do
 	volt3=$(echo $volt3Raw | cut -f1 -dV)
 
 	echo "Fitting Chimney: $chimney; PMTs: $pmt0,$pmt1,$pmt2,$pmt3; Voltages: $volt1,$volt2,$volt3"
+
+	root -l -b <<EOF
+     .x FitChargeDistributions.C("$chimney",$pmt1,$pmt2,$pmt3,$pmt4,${volt[1]},${volt[2]},${volt[3]},true);
+     .q;
+EOF
 done < HistogramsToFit.txt
 
 echo "Analysis finished."
