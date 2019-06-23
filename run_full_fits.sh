@@ -29,8 +29,8 @@ while read l1; do
 
 	echo "Fitting Chimney: $chimney; PMTs: $pmt0,$pmt1,$pmt2,$pmt3; Voltages: $volt1,$volt2,$volt3"
 
-	root -l -b <<EOF
-     .x FitChargeDistributions.C("$chimney",$pmt1,$pmt2,$pmt3,$pmt4,${volt[1]},${volt[2]},${volt[3]},true);
+	ROOTSYS=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-ubuntu18-gcc73-opt PATH=$ROOTSYS/bin:$PATH root -l -b <<EOF
+     .x FitChargeDistributions.C("$chimney",$pmt0,$pmt1,$pmt2,$pmt3,$volt1,$volt2,$volt3,true);
      .q;
 EOF
 done < HistogramsToFit.txt
