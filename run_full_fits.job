@@ -1,0 +1,16 @@
+Universe = vanilla
+Executable = run_full_fits.sh
+
+Rank = CPU_Speed
+
+# request_cpus = 4
+
+input 	= /home/kbenkend/ICARUS/PMT/Calibration/
+output 	= run_full_fits.out
+error 	= run_full_fits.error
+log 	= run_full_fits.log
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT_OR_EVICT
+
+Queue
