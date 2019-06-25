@@ -21,29 +21,24 @@
 // constants
 double PI = TMath::Pi();
 // define which parameters correspond to which indices
-const int NPAR = 16;
-int ipar1[6] = {  0, // common mu
+const int NPAR_i = 4;
+const int NPAR = NPAR_i*3-2;
+int ipar1[NPAR_i] = {  0, // common mu
                   1, // q for hist 1
                   2, // sigma for hist 1
                   3, // amplitude for hist 1
-		  4, // amplitude of background exponential for hist 1
-		  5  // coefficient of exponential for hist 1
 };
 
-int ipar2[6] = {  0, // common mu
-                  6, // q for hist 2
-                  7, // sigma for hist 2
-                  8, // amplitude for hist 2
-		  9, // amplitude of background exponential for hist 2
-		  10 // coefficient of exponential for hist 2
+int ipar2[NPAR_i] = {  0, // common mu
+                  4, // q for hist 2
+                  5, // sigma for hist 2
+                  6  // amplitude for hist 2
 };
 
-int ipar3[6] = {  0,  // common mu
-                  11, // q for hist 3
-                  12, // sigma for hist 3
-                  13, // amplitude for hist 3
-		  14, // amplitude of background exponential for hist 3
-		  15  // coefficient of exponential for hist 3
+int ipar3[NPAR_i] = {  0,  // common mu
+                  7, // q for hist 3
+                  8, // sigma for hist 3
+                  9 // amplitude for hist 3
 };
 
 // function declarations
@@ -59,11 +54,11 @@ struct GlobalChi2 {
     fChi2_1(&f1), fChi2_2(&f2), fChi2_3(&f3) {}
 
   double operator() (const double *par) const {
-    double p1[6];
-    double p2[6];
-    double p3[6];
+    double p1[NPAR_i];
+    double p2[NPAR_i];
+    double p3[NPAR_i];
 
-    for (int i = 0; i < 6; ++i){
+    for (int i = 0; i < NPAR_i; ++i){
       p1[i] = par[ipar1[i]];
       p2[i] = par[ipar2[i]];
       p3[i] = par[ipar3[i]];
@@ -84,7 +79,7 @@ void FitChargeDistributions(string pmtRow,
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
   int rbf_0 = 5;
-  double fbc_0 = 0.0;
+  double fbc_0 = 4.0;
   double fec_0 = 90.0;
   int rebinfactor[NCH]={rbf_0, rbf_0,rbf_0,rbf_0}; // rebin histograms
   double fitbeginch[NCH]={fbc_0,fbc_0,fbc_0,fbc_0}; // fit start locations
@@ -97,8 +92,8 @@ void FitChargeDistributions(string pmtRow,
   Fideal->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
   Fideal->SetLineColor(2); Fideal->SetLineStyle(1);
   */
-  double par[6];
-  double parerr[6];
+  double par[NPAR_i];
+  double parerr[NPAR_i];
 
   // process 3 files in a batch
   string rtfilenames[3];
@@ -161,15 +156,15 @@ void FitChargeDistributions(string pmtRow,
     }
 
     // generate fit functions
-    TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, 0, 500, 6);
+    TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, 0, 500, NPAR_i);
     fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
     fit_ideal_1->SetLineColor(2);
     fit_ideal_1->SetLineStyle(1);
-    TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, 0, 500, 6);
+    TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, 0, 500, NPAR_i);
     fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
     fit_ideal_2->SetLineColor(2);
     fit_ideal_2->SetLineStyle(1);
-    TF1* fit_ideal_3 = new TF1("fit_ideal_1",IdealResponse, 0, 500, 6);
+    TF1* fit_ideal_3 = new TF1("fit_ideal_1",IdealResponse, 0, 500, NPAR_i);
     fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
     fit_ideal_3->SetLineColor(2);
     fit_ideal_3->SetLineStyle(1);
@@ -210,44 +205,26 @@ void FitChargeDistributions(string pmtRow,
                             q_0,
                             sigma_0,
                             hCharge[0]->Integral()/2,
-			    expAmp_0,
-			    expCoeff_0,
                             q_0,
                             sigma_0,
                             hCharge[1]->Integral()/2,
-			    expAmp_0,
-			    expCoeff_0,
                             q_0,
                             sigma_0,
-                            hCharge[2]->Integral()/2,
-			    expAmp_0,
-			    expCoeff_0}; // starting values
+                            hCharge[2]->Integral()/2}; // starting values
    
     // set ranges on fit parameters
     fitter.Config().SetParamsSettings(NPAR, par0);
 
     // mu
     fitter.Config().ParSettings(0).SetLimits(5, 30);
-    
-    // q
-    for(int j = 1; j < 12; j += 5){
-      fitter.Config().ParSettings(j).SetLimits(0.01, 10);
-    }
-    // sigma
-    for(int j = 2; j < 13; j += 5){
-      fitter.Config().ParSettings(j).SetLimits(0.01, 10);
-    }
-    // amplitude
-    for(int j = 3; j < 14; j += 5){
-      fitter.Config().ParSettings(j).SetLimits(0.01, 20000);
-    }
-    // exponential amplitude
-    for(int j = 4; j < 15; j += 5){
-      fitter.Config().ParSettings(j).SetLimits(0.0001, 200);
-    }
-    // exponential coefficient
-    for(int j = 5; j < 16; j += 5){
-      fitter.Config().ParSettings(j).SetLimits(0.01, 30);
+
+    for(int j = 0; j < 3; j ++){
+      // q
+      fitter.Config().ParSettings(j*(NPAR_i-1)+1).SetLimits(0.01, 10);
+      // sigma
+      fitter.Config().ParSettings(j*(NPAR_i-1)+2).SetLimits(0.01, 5);
+      // amplitude
+      fitter.Config().ParSettings(j*(NPAR_i-1)+3).SetLimits(0.01, 20000);
     }
 
     fitter.Config().MinimizerOptions().SetPrintLevel(0);
@@ -286,9 +263,13 @@ void FitChargeDistributions(string pmtRow,
     // write parameters to output txt file
 
     // Print initial parameters
-    foutFit<<fbc_0<<"\t"<<fec_0<<"\t"<<rbf_0<<"\t"
-	   <<hist_mean_1<<"\t"<<q_0<<"\t"<<sigma_0<<"\t"
-	   <<expAmp_0<<"\t"<<expCoeff_0<<"\t"<<hCharge[0]->Integral()/2
+    foutFit<<fbc_0<<"\t"               //start fit
+	   <<fec_0<<"\t"               //end fit
+	   <<rbf_0<<"\t"               //rebin factor
+	   <<hist_mean_1<<"\t"         //mu
+	   <<q_0<<"\t"                 //q
+	   <<sigma_0<<"\t"             //sigma
+	   <<hCharge[0]->Integral()/2  //amplitude
 	   <<endl;
     
     // Voltage 1
@@ -298,8 +279,6 @@ void FitChargeDistributions(string pmtRow,
 	   <<"\t"<<par[1]<<"\t"<<fit_ideal_1->GetParError(1)
 	   <<"\t"<<par[2]<<"\t"<<fit_ideal_1->GetParError(2)
 	   <<"\t"<<par[3]<<"\t"<<fit_ideal_1->GetParError(3)
-	   <<"\t"<<par[4]<<"\t"<<fit_ideal_1->GetParError(4)
-	   <<"\t"<<par[5]<<"\t"<<fit_ideal_1->GetParError(5)
 	   <<"\t"<<fit_ideal_1->GetChisquare()
 	   <<"\t"<<fit_ideal_1->GetNDF()
 	   <<"\t"<<fit_ideal_1->GetProb()
@@ -311,9 +290,7 @@ void FitChargeDistributions(string pmtRow,
 	   <<"\t"<<par[0]<<"\t"<<fit_ideal_2->GetParError(0)
 	   <<"\t"<<par[1]<<"\t"<<fit_ideal_2->GetParError(1)
 	   <<"\t"<<par[2]<<"\t"<<fit_ideal_2->GetParError(2)
-	   <<"\t"<<par[3]<<"\t"<<fit_ideal_2->GetParError(3)
-	   <<"\t"<<par[4]<<"\t"<<fit_ideal_2->GetParError(4)
-	   <<"\t"<<par[5]<<"\t"<<fit_ideal_2->GetParError(5)   
+	   <<"\t"<<par[3]<<"\t"<<fit_ideal_2->GetParError(3) 
 	   <<"\t"<<fit_ideal_2->GetChisquare()
 	   <<"\t"<<fit_ideal_2->GetNDF()
 	   <<"\t"<<fit_ideal_2->GetProb()
@@ -326,8 +303,6 @@ void FitChargeDistributions(string pmtRow,
 	   <<"\t"<<par[1]<<"\t"<<fit_ideal_3->GetParError(1)
 	   <<"\t"<<par[2]<<"\t"<<fit_ideal_3->GetParError(2)
 	   <<"\t"<<par[3]<<"\t"<<fit_ideal_3->GetParError(3)
-	   <<"\t"<<par[4]<<"\t"<<fit_ideal_3->GetParError(4)
-	   <<"\t"<<par[5]<<"\t"<<fit_ideal_3->GetParError(5)
 	   <<"\t"<<fit_ideal_3->GetChisquare()
 	   <<"\t"<<fit_ideal_3->GetNDF()
 	   <<"\t"<<fit_ideal_3->GetProb()
@@ -353,13 +328,11 @@ double IdealResponse(double *x,double *par){
   double q = par[1];
   double sigma = par[2];
   double amplitude = par[3];
-  double expAmp = par[4];
-  double expCoef = par[5];
   double sum=0;
   for(Int_t n=1; n<50; n++){
     sum += (TMath::Power(mu,n)*TMath::Exp(-1.0*mu)/TMath::Factorial(n)*TMath::Exp(-1.0*(x[0]-q*n)*(x[0]-q*n)/(2.0*n*sigma*sigma))/(sigma*TMath::Sqrt(2.0*PI*n)));
   }
-  return amplitude * (sum + expAmp*TMath::Exp(-1.0*expCoef*x[0]));
+  return amplitude * sum;
 }
 
 Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3){
