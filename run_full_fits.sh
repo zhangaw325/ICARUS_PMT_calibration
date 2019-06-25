@@ -2,6 +2,9 @@
 
 echo "Starting analysis."
 
+echo "$ROOTSYS"
+echo "$PATH"
+
 # Loop over result.root files in sets of 3
 while read l1; do
 
@@ -30,8 +33,8 @@ while read l1; do
 	echo "Fitting Chimney: $chimney; PMTs: $pmt0,$pmt1,$pmt2,$pmt3; Voltages: $volt1,$volt2,$volt3"
 
 	ROOTSYS=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-ubuntu18-gcc73-opt PATH=$ROOTSYS/bin:$PATH root -l -b <<EOF
-     .x FitChargeDistributions.C("$chimney",$pmt0,$pmt1,$pmt2,$pmt3,$volt1,$volt2,$volt3,true);
-     .q;
+        .x FitChargeDistributions.C("$chimney",$pmt0,$pmt1,$pmt2,$pmt3,$volt1,$volt2,$volt3,true);
+        .q;
 EOF
 done < HistogramsToFit.txt
 
