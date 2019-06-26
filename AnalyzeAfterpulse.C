@@ -95,6 +95,10 @@ void AnalyzeAfterpulse(string pmtRow,
     Double_t firstPulseMeanError[NVOLTAGES];
     Double_t secondPulseMean[NVOLTAGES];
     Double_t secondPulseMeanError[NVOLTAGES];
+    Double_t firstPulseChi2[NVOLTAGES];
+    Double_t firstPulseNDF[NVOLTAGES];
+    Double_t secondPulseChi2[NVOLTAGES];
+    Double_t secondPulseNDF[NVOLTAGES];
 
     // generate histograms and calculate values
     sprintf(tempname, "Results/PulseTimeDist_%d",i);
@@ -117,7 +121,7 @@ void AnalyzeAfterpulse(string pmtRow,
 
       // find pulses
       TF1 *pulse1 = new TF1("pulse1", "gaus", 0.5, 3.5);
-      TF1 *pusle2 = new TF1("pulse2", "gaus", 4.5, 8.5);
+      TF1 *pulse2 = new TF1("pulse2", "gaus", 4.5, 8.5);
 
       hPulseDist[j]->Fit(pulse1, "R");
       hPulseDist[j]->Fit(pulse2, "R+"); // fit and add to list of fitted functions
@@ -132,7 +136,12 @@ void AnalyzeAfterpulse(string pmtRow,
       firstPulseMean[j] = pulse1->GetParameter(1);
       firstPulseMeanError[j] = pulse1->GetParError(1);
       secondPulseMean[j] = pulse2->GetParameter(1);
-      secondPulseMeanError[j] = pusle2->GetParError(1);
+      secondPulseMeanError[j] = pulse2->GetParError(1);
+
+      firstPulseChi2[j] = pulse1->GetChisquare();
+      firstPulseNDF[j] = pulse1->GetNDF();
+      secondPulseChi2[j] = pulse2->GetChisquare();
+      secondPulseNDF[j] = pulse2->GetNDF();
 
       // cout << secondPulseMean[j] << "\t" << secondPulseMeanError[j] << endl;
 
@@ -158,8 +167,12 @@ void AnalyzeAfterpulse(string pmtRow,
     	foutFit << "Pulse Locs:\tchID\t" << i 
     			<< "\t" << firstPulseMean[j]
     			<< "\t" << firstPulseMeanError[j]
+    			<< "\t" << firstPulseChi2[j] 
+    			<< "/" << firstPulseNDF[j]
     			<< "\t" << secondPulseMean[j]
     			<< "\t" << secondPulseMeanError[j]
+    			<< "\t" << secondPulseChi2[j]
+    			<< "/" << secondPulseNDF[j]
     			<< endl;
     }
 
