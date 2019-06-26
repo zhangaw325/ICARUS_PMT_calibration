@@ -115,18 +115,24 @@ void AnalyzeAfterpulse(string pmtRow,
       // switch to proper pad to begin fitting
       c[i]->cd(j+1);
 
-      // find first pulse
-      Double_t* peakLocs = findPeaksInRange(hPulseDist[j], 0.48, 4, 1.25, 0.05, 1); // find first two peaks between 0.48 us and 4 us
-      firstPulseMean[j] = peakLocs[0];
+      // find pulses
+      TF1 *pulse1 = new TF1("pulse1", "gaus", 0.5, 3.5);
+      TF1 *pusle2 = new TF1("pulse2", "gaus", 4.5, 8.5);
 
-      Double_t binWidth = hPulseDist[j]->GetBinWidth(0);
-      firstPulseMeanError[j] = 2 * binWidth; // two times bin width for the error, for now
+      hPulseDist[j]->Fit(pulse1, "R");
+      hPulseDist[j]->Fit(pulse2, "R+"); // fit and add to list of fitted functions
 
-      // fit second, larger pulse
-      hPulseDist[j]->Fit("gaus","","",4.5,8.5);
-      TF1 *fitSecond = (TF1*)hPulseDist[j]->GetListOfFunctions()->FindObject("gaus");
-      secondPulseMean[j] = fitSecond->GetParameter(1);
-      secondPulseMeanError[j] = fitSecond->GetParError(1);
+      // Double_t* peakLocs = findPeaksInRange(hPulseDist[j], 0.48, 4, 1.25, 0.05, 1); // find first two peaks between 0.48 us and 4 us
+      // firstPulseMean[j] = peakLocs[0];
+
+      // Double_t binWidth = hPulseDist[j]->GetBinWidth(0);
+      // firstPulseMeanError[j] = 2 * binWidth; // two times bin width for the error, for now
+
+      //TF1 *fitSecond = (TF1*)hPulseDist[j]->GetListOfFunctions()->FindObject("gaus");
+      firstPulseMean[j] = pulse1->GetParameter(1);
+      firstPulseMeanError[j] = pulse1->GetParError(1);
+      secondPulseMean[j] = pulse2->GetParameter(1);
+      secondPulseMeanError[j] = pusle2->GetParError(1);
 
       // cout << secondPulseMean[j] << "\t" << secondPulseMeanError[j] << endl;
 
