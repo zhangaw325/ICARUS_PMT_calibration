@@ -10,3 +10,6 @@ while read p; do
 done < WaveformDirectories.txt
 
 ./fix_led_names.sh
+
+echo "Deleting filelist files"
+rm *filelist*PMT*.txt
