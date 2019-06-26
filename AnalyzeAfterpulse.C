@@ -117,7 +117,7 @@ void AnalyzeAfterpulse(string pmtRow,
 
       // find pulses
       TF1 *pulse1 = new TF1("pulse1", "gaus", 0.5, 3.5);
-      TF1 *pusle2 = new TF1("pulse2", "gaus", 4.5, 8.5);
+      TF1 *pulse2 = new TF1("pulse2", "gaus", 4.5, 8.5);
 
       hPulseDist[j]->Fit(pulse1, "R");
       hPulseDist[j]->Fit(pulse2, "R+"); // fit and add to list of fitted functions
