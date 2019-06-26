@@ -137,11 +137,14 @@ void AnalyzeAfterpulse(string pmtRow,
       firstPulseMeanError[j] = pulse1->GetParError(1);
       secondPulseMean[j] = pulse2->GetParameter(1);
       secondPulseMeanError[j] = pulse2->GetParError(1);
+<<<<<<< HEAD
 
       firstPulseChi2[j] = pulse1->GetChisquare();
       firstPulseNDF[j] = pulse1->GetNDF();
       secondPulseChi2[j] = pulse2->GetChisquare();
       secondPulseNDF[j] = pulse2->GetNDF();
+=======
+>>>>>>> 9692b9bf1a1f4d9cdb3f3599d669c6c29cf410b5
 
       // cout << secondPulseMean[j] << "\t" << secondPulseMeanError[j] << endl;
 
