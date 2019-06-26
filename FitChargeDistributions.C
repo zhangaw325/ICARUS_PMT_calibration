@@ -79,11 +79,12 @@ void FitChargeDistributions(string pmtRow,
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
   int rbf_0 = 5;
-  double fbc_0 = 4.0;
+  double fbc_0 = 2.0;
   double fec_0 = 90.0;
   int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
   double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
   double fitendch[NCH] = {fec_0, fec_0, fec_0, fec_0}; // fit end locations
+  string initparam[4];
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
@@ -133,6 +134,9 @@ void FitChargeDistributions(string pmtRow,
   }
 
   ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(5000);
+
+  // Print header
+  foutFit << "**************************** PARAMETER VALUES ****************************" << endl;
   
   // Generate 4 canvases and plot the PMT histograms on them
   for(int i = 0; i < 4; i++){
@@ -157,15 +161,15 @@ void FitChargeDistributions(string pmtRow,
 
     // generate fit functions
     TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, 0, 500, NPAR_i);
-    fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
+    fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
     fit_ideal_1->SetLineColor(2);
     fit_ideal_1->SetLineStyle(1);
     TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, 0, 500, NPAR_i);
-    fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
+    fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
     fit_ideal_2->SetLineColor(2);
     fit_ideal_2->SetLineStyle(1);
     TF1* fit_ideal_3 = new TF1("fit_ideal_1",IdealResponse, 0, 500, NPAR_i);
-    fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
+    fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
     fit_ideal_3->SetLineColor(2);
     fit_ideal_3->SetLineStyle(1);
 
@@ -216,13 +220,13 @@ void FitChargeDistributions(string pmtRow,
     fitter.Config().SetParamsSettings(NPAR, par0);
 
     // mu
-    fitter.Config().ParSettings(0).SetLimits(5, 90);
+    fitter.Config().ParSettings(0).SetLimits(5, 30);
 
     for(int j = 0; j < 3; j ++){
       // q
       fitter.Config().ParSettings(j*(NPAR_i-1)+1).SetLimits(0.01, 10);
       // sigma
-      fitter.Config().ParSettings(j*(NPAR_i-1)+2).SetLimits(0.01, 5);
+      fitter.Config().ParSettings(j*(NPAR_i-1)+2).SetLimits(0.1, 3.1);
       // amplitude
       fitter.Config().ParSettings(j*(NPAR_i-1)+3).SetLimits(0.01, 20000);
     }
@@ -232,7 +236,7 @@ void FitChargeDistributions(string pmtRow,
 
     // fit FCN function directly
     // (specify optionally data size and flag to indicate that is a chi2 fit)
-    fitter.FitFCN(NPAR,globalChi2,0, chargeData[0].Size() + chargeData[1].Size() + chargeData[2].Size() ,true);
+    fitter.FitFCN(NPAR,globalChi2,0, chargeData[0].Size() + chargeData[1].Size() + chargeData[2].Size(), true);
     ROOT::Fit::FitResult result;
     for(int j = 0; j < 3; j++){
       result = fitter.Result();
@@ -261,20 +265,14 @@ void FitChargeDistributions(string pmtRow,
     }
 
     // write parameters to output txt file
-    // Print initial parameters once
-    if(i == 0){
-      for(int j = 0; j < 4; j++){
-	foutFit<<"chID\t"<<j<<"\t"       //channel id
-	       <<fitbeginch[j]<<"\t"       //start fit
-	       <<fitendch[j]<<"\t"         //end fit
-	       <<rebinfactor[j]<<"\t"      //rebin factor
-	       <<hist_mean_1<<"\t"         //mu
-	       <<q_0<<"\t"                 //q
-	       <<sigma_0<<"\t"             //sigma
-	       <<hCharge[0]->Integral()/2  //amplitude
-	       <<endl;
-      }
-    }
+    initparam[i]="chID\t"+to_string(i)+"\t"       //channel id
+      +fitbeginch[i]+"\t"         //start fit
+      +fitendch[i]+"\t"           //end fit
+      +rebinfactor[i]+"\t"        //rebin factor
+      +hist_mean_1+"\t"           //mu
+      +q_0+"\t"                   //q
+      +sigma_0+"\t"               //sigma
+      +hCharge[0]->Integral()/2;  //amplitude
     
     // Voltage 1
     fit_ideal_1->GetParameters(par);
@@ -320,6 +318,12 @@ void FitChargeDistributions(string pmtRow,
     outROOTfile->cd();
     c[i]->Write();
     c[i]->Print(resultnames[i].c_str(),"pdf");
+  }
+
+  // print initial parameters at end of root file
+  foutFit << "**************************** INITIAL PARAMETERS ****************************" << endl;
+  for(int i = 0; i < 4; i++){
+    foutFit << initparam[i] << endl;
   }
   
   // close output ROOT file
