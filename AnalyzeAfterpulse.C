@@ -164,7 +164,7 @@ void AnalyzeAfterpulse(string pmtRow,
     // foutFit << "********** pulse locations and errors (first then second) **********" << endl;
 
     for(int j = 0; j < NVOLTAGES; j++){
-    	foutFit << "Pulse Locs:\tchID\t" << i 
+    	foutFit << "Pulse Locations:\tchID\t" << i 
     			<< "\t" << firstPulseMean[j]
     			<< "\t" << firstPulseMeanError[j]
     			<< "\t" << firstPulseChi2[j] 
