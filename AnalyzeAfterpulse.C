@@ -25,7 +25,7 @@ void AnalyzeAfterpulse(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rbf_0 = 5;
+  int rbf_0 = 2;
   double fbc_0 = 0.0;
   double fec_0 = 90.0;
   int rebinfactor[NCH]={rbf_0, rbf_0,rbf_0,rbf_0}; // rebin histograms
@@ -110,7 +110,7 @@ void AnalyzeAfterpulse(string pmtRow,
       // calculate afterpulse probability
       afterpulseProb[j] = calculateAfterpulseProb(hPulseDist[j], 0.48); // 480 ns to cut out LED pulse
 
-      cout << afterpulseProb[j] << endl;
+      // cout << afterpulseProb[j] << endl;
 
       // switch to proper pad to begin fitting
       c[i]->cd(j+1);
@@ -128,7 +128,7 @@ void AnalyzeAfterpulse(string pmtRow,
       secondPulseMean[j] = fitSecond->GetParameter(1);
       secondPulseMeanError[j] = fitSecond->GetParError(1);
 
-      cout << secondPulseMean[j] << "\t" << secondPulseMeanError[j] << endl;
+      // cout << secondPulseMean[j] << "\t" << secondPulseMeanError[j] << endl;
 
       // draw histogram
       hPulseDist[j]->Draw();
