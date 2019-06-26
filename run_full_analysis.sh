@@ -13,3 +13,5 @@ done < WaveformDirectories.txt
 
 echo "Deleting filelist files"
 rm filelist*PMT*.txt
+
+echo "Done"
