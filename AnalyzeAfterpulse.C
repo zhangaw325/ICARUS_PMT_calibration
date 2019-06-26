@@ -132,7 +132,7 @@ void AnalyzeAfterpulse(string pmtRow,
       firstPulseMean[j] = pulse1->GetParameter(1);
       firstPulseMeanError[j] = pulse1->GetParError(1);
       secondPulseMean[j] = pulse2->GetParameter(1);
-      secondPulseMeanError[j] = pusle2->GetParError(1);
+      secondPulseMeanError[j] = pulse2->GetParError(1);
 
       // cout << secondPulseMean[j] << "\t" << secondPulseMeanError[j] << endl;
 
