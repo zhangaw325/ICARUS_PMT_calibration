@@ -81,9 +81,9 @@ void FitChargeDistributions(string pmtRow,
   int rbf_0 = 5;
   double fbc_0 = 4.0;
   double fec_0 = 90.0;
-  int rebinfactor[NCH]={rbf_0, rbf_0,rbf_0,rbf_0}; // rebin histograms
-  double fitbeginch[NCH]={fbc_0,fbc_0,fbc_0,fbc_0}; // fit start locations
-  double fitendch[NCH] = {fec_0,fec_0,fec_0,fec_0}; // fit end locations
+  int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
+  double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
+  double fitendch[NCH] = {fec_0, fec_0, fec_0, fec_0}; // fit end locations
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
@@ -216,7 +216,7 @@ void FitChargeDistributions(string pmtRow,
     fitter.Config().SetParamsSettings(NPAR, par0);
 
     // mu
-    fitter.Config().ParSettings(0).SetLimits(5, 30);
+    fitter.Config().ParSettings(0).SetLimits(5, 90);
 
     for(int j = 0; j < 3; j ++){
       // q
@@ -261,16 +261,20 @@ void FitChargeDistributions(string pmtRow,
     }
 
     // write parameters to output txt file
-
-    // Print initial parameters
-    foutFit<<fbc_0<<"\t"               //start fit
-	   <<fec_0<<"\t"               //end fit
-	   <<rbf_0<<"\t"               //rebin factor
-	   <<hist_mean_1<<"\t"         //mu
-	   <<q_0<<"\t"                 //q
-	   <<sigma_0<<"\t"             //sigma
-	   <<hCharge[0]->Integral()/2  //amplitude
-	   <<endl;
+    // Print initial parameters once
+    if(i == 0){
+      for(int j = 0; j < 4; j++){
+	foutFit<<"chID\t"<<j<<"\t"       //channel id
+	       <<fitbeginch[j]<<"\t"       //start fit
+	       <<fitendch[j]<<"\t"         //end fit
+	       <<rebinfactor[j]<<"\t"      //rebin factor
+	       <<hist_mean_1<<"\t"         //mu
+	       <<q_0<<"\t"                 //q
+	       <<sigma_0<<"\t"             //sigma
+	       <<hCharge[0]->Integral()/2  //amplitude
+	       <<endl;
+      }
+    }
     
     // Voltage 1
     fit_ideal_1->GetParameters(par);
@@ -317,7 +321,7 @@ void FitChargeDistributions(string pmtRow,
     c[i]->Write();
     c[i]->Print(resultnames[i].c_str(),"pdf");
   }
-
+  
   // close output ROOT file
   outROOTfile->Close();
 }
