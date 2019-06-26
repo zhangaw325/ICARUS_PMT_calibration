@@ -82,8 +82,9 @@ void FitChargeDistributions(string pmtRow,
   double fbc_0 = 4.0;
   double fec_0 = 90.0;
   int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
-  double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
+  double fitbeginch[NCH]={fbc_0, 0, fbc_0, fbc_0}; // fit start locations
   double fitendch[NCH] = {fec_0, fec_0, fec_0, fec_0}; // fit end locations
+  string initparam[4];
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
@@ -261,20 +262,14 @@ void FitChargeDistributions(string pmtRow,
     }
 
     // write parameters to output txt file
-    // Print initial parameters once
-    if(i == 0){
-      for(int j = 0; j < 4; j++){
-	foutFit<<"chID\t"<<j<<"\t"       //channel id
-	       <<fitbeginch[j]<<"\t"       //start fit
-	       <<fitendch[j]<<"\t"         //end fit
-	       <<rebinfactor[j]<<"\t"      //rebin factor
-	       <<hist_mean_1<<"\t"         //mu
-	       <<q_0<<"\t"                 //q
-	       <<sigma_0<<"\t"             //sigma
-	       <<hCharge[0]->Integral()/2  //amplitude
-	       <<endl;
-      }
-    }
+    initparam[i]="chID\t"+to_string(i)+"\t"       //channel id
+      +fitbeginch[i]+"\t"         //start fit
+      +fitendch[i]+"\t"           //end fit
+      +rebinfactor[i]+"\t"        //rebin factor
+      +hist_mean_1+"\t"           //mu
+      +q_0+"\t"                   //q
+      +sigma_0+"\t"               //sigma
+      +hCharge[0]->Integral()/2;  //amplitude
     
     // Voltage 1
     fit_ideal_1->GetParameters(par);
@@ -320,6 +315,12 @@ void FitChargeDistributions(string pmtRow,
     outROOTfile->cd();
     c[i]->Write();
     c[i]->Print(resultnames[i].c_str(),"pdf");
+  }
+
+  // print initial parameters at end of root file
+  foutFit << "**************************** INITIAL PARAMETERS ****************************" << endl;
+  for(int i = 0; i < 4; i++){
+    foutFit << initparam[i] << endl;
   }
   
   // close output ROOT file
