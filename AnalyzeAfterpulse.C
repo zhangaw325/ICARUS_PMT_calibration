@@ -168,11 +168,11 @@ void AnalyzeAfterpulse(string pmtRow,
     			<< "\t" << firstPulseMean[j]
     			<< "\t" << firstPulseMeanError[j]
     			<< "\t" << firstPulseChi2[j] 
-    			<< "/" << firstPulseNDF[j]
+    			<< "\t" << firstPulseNDF[j]
     			<< "\t" << secondPulseMean[j]
     			<< "\t" << secondPulseMeanError[j]
     			<< "\t" << secondPulseChi2[j]
-    			<< "/" << secondPulseNDF[j]
+    			<< "\t" << secondPulseNDF[j]
     			<< endl;
     }
 

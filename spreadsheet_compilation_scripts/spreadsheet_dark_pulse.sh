@@ -5,11 +5,11 @@ echo $chimney
 
 # find LED off files
 offFiles=(${chimney}_PMT_*_LedOff_output.txt)
-numFiles=${#offfiles[@]}
+numFiles=${#offFiles[@]}
 echo "$numFiles LED off files found"
 
 if [ "$numFiles" -ne "9" ]
-do
+then
 	echo "Improper number of LED off files found."
 	exit 1
 fi
@@ -18,6 +18,10 @@ i=0
 out_index=0
 PMT_nums=()
 out_nums=()
+
+for ind in {0..29}; do
+	out_nums[$ind]=0
+done
 
 for file in "${offFiles[@]}"; do
 	echo $file
@@ -34,14 +38,25 @@ for file in "${offFiles[@]}"; do
 
 	let "imod=$i%3"
 	if [ "$imod" -eq "0" ]
-		let "$out_index=$i"
-		PMT_nums[$i]=pmt0
+	then
+		let "out_index==$i*4"
+		PMT_nums[$i]=$pmt0
 		let "j=$i+1"
-		PMT_nums[$j]=pmt1
+		PMT_nums[$j]=$pmt1
 		let "j=$i+2"
-		PMT_nums[$j]=pmt2
+		PMT_nums[$j]=$pmt2
 		let "j=$i+3"
-		PMT_nums[$j]=pmt3
+		PMT_nums[$j]=$pmt3
+	fi
+
+	if [ "$imod" -eq "1" ]
+	then
+		let "out_index=($i*4)-3"
+	fi
+
+	if [ "$imod" -eq "2" ]
+	then
+		let "out_index=($i*4)-6"
 	fi
 
 	#------------------------------
@@ -61,13 +76,13 @@ for file in "${offFiles[@]}"; do
 
 	# output in proper order
 	out_nums[$out_index]=$pulse0
-	((out_index+=3))
+	((out_index+=4))
 	out_nums[$out_index]=$pulse1
-	((out_index+=3))
+	((out_index+=4))
 	out_nums[$out_index]=$pulse2
-	((out_index+=3))
+	((out_index+=4))
 	out_nums[$out_index]=$pulse3
-	((out_index+=3))
+	((out_index+=4))
 
 	# increment index
 	((i++))
