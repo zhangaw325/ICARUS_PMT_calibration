@@ -1,5 +1,5 @@
 Universe = vanilla
-Executable = run_full_analysis.sh
+Executable = run_full_analysis_batch.sh
 
 Rank = CPU_Speed
 
