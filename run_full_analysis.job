@@ -1,0 +1,16 @@
+Universe = vanilla
+Executable = run_full_analysis.sh
+
+Rank = CPU_Speed
+
+# request_cpus = 4
+
+input 	= /home/kbenkend/ICARUS/PMT/Calibration/
+output 	= run_full_analysis_LedOff.out
+error 	= run_full_analysis_LedOff.error
+log 	= run_full_analysis_LedOff.log
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT_OR_EVICT
+
+Queue
