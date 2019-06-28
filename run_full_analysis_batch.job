@@ -14,4 +14,4 @@ log 	= $(Process).run_full_analysis.log
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT_OR_EVICT
 
-Queue 300
+Queue 280
