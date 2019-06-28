@@ -7,7 +7,7 @@ while read p; do
   echo "Analyzing $p"
   echo $p | ./analyze_cl.sh
   # echo $p
-done < %1.WaveformDirectories.txt # %1 refers to first argument of command
+done < ${1}.WaveformDirectories.txt # %1 refers to first argument of command
 
 ./fix_led_names.sh
 
