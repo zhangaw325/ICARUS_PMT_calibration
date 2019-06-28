@@ -50,9 +50,9 @@ void GainVoltage(string chimney, Int_t pmt_num){
   Double_t gain_error[num_data_points];
 
   for(int i = 0; i < num_data_points; i++){
-    voltage[i] = voltage_raw[i];
-    gain[i] = gain_raw[i];
-    gain_error[i] = gain_error_raw[i];
+    voltage[i] = TMath::Log(voltage_raw[i]);
+    gain[i] = TMath::Log(gain_raw[i]);
+    gain_error[i] = TMath::Log(gain_error_raw[i]);
   }
 
   if(num_data_points != 3 && num_data_points != 6){
@@ -61,10 +61,12 @@ void GainVoltage(string chimney, Int_t pmt_num){
   }
 
   // Define power law fit function
-  TF1 * fit = new TF1("fit",power,fbegin,fend,NPAR);
+  // TF1 * fit = new TF1("fit",power,fbegin,fend,NPAR);
+  // Perform linear fit on log-log plot
+  TF1 *fit = new TF1("fit", "pol1", fbegin, fend);
   double par[NPAR];
   double parerr[NPAR];
-  fit->SetParNames("Amplitude Constant", "Exponent");
+  fit->SetParNames("Constant", "Exponent");
   fit->SetLineColor(2);
   fit->SetLineStyle(1);
   
@@ -75,9 +77,10 @@ void GainVoltage(string chimney, Int_t pmt_num){
 
   // Create graph of data
   TGraph* data = new TGraphErrors(num_data_points, voltage, gain, 0, gain_error);
-  data->SetTitle("PMT Gain versus Voltage;"
-		 "Voltage [V];"
-		 "Gain");
+  string title = "PMT " + chimney + "_" + pmt_num + "gain vs voltage;";
+  data->SetTitle( title
+		              "Voltage [V];"
+		              "Gain");
   data->SetMarkerStyle(kCircle);
   // Fit
   fit->SetParameters(0.003,0.33);
