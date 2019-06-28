@@ -23,6 +23,13 @@ void GainVoltage(string chimney, Int_t pmt_num){
   double fend = 2000;     // end fit
   int NPAR = 2;        // number of parameters
   
+  // output files
+  string outnametxt = chimney + "_" + to_string(pmt_num) + "_gainvsvoltage.txt";
+  string outnameroot = chimney + "_" + to_string(pmt_num) + "_gainvsvoltage.root";
+  string outnamepdf = chimney + "_" + to_string(pmt_num) + "gainvsvoltage.pdf";
+  TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
+  fstream fout(outnametxt.c_str(),ios::out);
+
   // read gain and voltage values for the PMT in question
   string input_file_name = chimney + ".txt";
   std::ifstream input_file(input_file_name);
@@ -52,7 +59,7 @@ void GainVoltage(string chimney, Int_t pmt_num){
   for(int i = 0; i < num_data_points; i++){
     voltage[i] = TMath::Log(voltage_raw[i]);
     gain[i] = TMath::Log(gain_raw[i]);
-    gain_error[i] = TMath::Log(gain_error_raw[i]);
+    gain_error[i] = gain_error_raw[i]/gain_raw[i];
   }
 
   if(num_data_points != 3 && num_data_points != 6){
@@ -77,7 +84,7 @@ void GainVoltage(string chimney, Int_t pmt_num){
 
   // Create graph of data
   TGraph* data = new TGraphErrors(num_data_points, voltage, gain, 0, gain_error);
-  string title = "PMT " + chimney + "_" + pmt_num + "gain vs voltage;";
+  string title = "PMT " + chimney + "_" + to_string(pmt_num) + "gain vs voltage;";
   data->SetTitle( title
 		              "Voltage [V];"
 		              "Gain");
@@ -86,17 +93,20 @@ void GainVoltage(string chimney, Int_t pmt_num){
   fit->SetParameters(0.003,0.33);
   data->Fit("fit");
   gStyle->SetOptFit();
-  // fit->GetParameters(par);
-  // cout<<"\t"<<par[0]<<"\t"<<fit->GetParError(0)
-  //     <<"\t"<<par[1]<<"\t"<<fit->GetParError(1)
-  //     <<"\t"<<par[2]<<"\t"<<fit->GetParError(2)
-  //     <<"\t"<<fit->GetChisquare()
-  //     <<"\t"<<fit->GetNDF()
-  //     <<"\t"<<fit->GetProb()
-  //     <<endl;
+  fit->GetParameters(par);
+  fout << 
+  fout<<"\t"<<par[0]<<"\t"<<fit->GetParError(0)
+       <<"\t"<<par[1]<<"\t"<<fit->GetParError(1)
+       <<"\t"<<par[2]<<"\t"<<fit->GetParError(2)
+       <<"\t"<<fit->GetChisquare()
+       <<"\t"<<fit->GetNDF()
+       <<"\t"<<fit->GetProb()
+       <<endl;
 
   // Plot gain and voltage
   data->Draw("ap");
+
+  c1->Print(outnamepdf.c_str(),"pdf");
 }
 
 // Power law function definition: a * (x ^ k)
