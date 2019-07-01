@@ -132,19 +132,19 @@ void GainVoltage(string chimney){
     Double_t amplitude = TMath::Exp(constant); 
     // spacer lines
     for(int j = 0; j < 2; j++){
-      fout  << "--" << "\t" << "--"
-            << "\t" << "--" << "\t" << "--"
-            << "\t" << "--"
-            << "\t" << "--"
-            << "\t" << "--"
+      fout  << "--" << "\t," << "--"
+            << "\t," << "--" << "\t," << "--"
+            << "\t," << "--"
+            << "\t," << "--"
+            << "\t," << "--"
             << endl;
     }
     //fout << "PMT" << "\t" << pmt_num + 1
-    fout << constant <<"\t"<<fit->GetParError(0)
-         << "\t" << exponent <<"\t"<<fit->GetParError(1)
-         << "\t" << fit->GetChisquare()
-         << "\t" << fit->GetNDF()
-         << "\t" << fit->GetProb()
+    fout << constant <<"\t,"<<fit->GetParError(0)
+         << "\t," << exponent <<"\t,"<<fit->GetParError(1)
+         << "\t," << fit->GetChisquare()
+         << "\t," << fit->GetNDF()
+         << "\t," << fit->GetProb()
          <<endl;
 
     // Plot gain and voltage
