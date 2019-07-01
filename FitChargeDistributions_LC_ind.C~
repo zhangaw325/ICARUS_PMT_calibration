@@ -87,7 +87,7 @@ void FitChargeDistributions_LC_ind(string pmtRow,
   int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
   double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
   double fitendch[NCH] = {fec_0, fec_0, fec_0, fec_0}; // fit end locations
-  string initparam[4][3];
+  string initparam[4];
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
@@ -169,38 +169,28 @@ void FitChargeDistributions_LC_ind(string pmtRow,
   fit_ideal_3->SetLineColor(2);
   fit_ideal_3->SetLineStyle(1);
   
-  // default parameters
+  // initial parameters
   Double_t hist_mean_1 = truncatedMean(hCharge[1], 10);
-  Double_t mu_def = hist_mean_1;
-  Double_t q_def = 1.6;
-  Double_t sigma_def = 1.6*0.4;
-
-  // initial parameters for each voltage
-  // ****** CHANGE THESE ARRAY VALUES TO RECORD TO OUTPUT *******
-  Double_t mu_0[3], q_0[3], sigma_0[3], amp_0[3];
-  for(int k = 0; k < 3; k++){
-    mu_0[k] = mu_def;
-    q_0[k] = q_def;
-    sigma_0[k] = sigma_def;
-    amp_0[k] = hCharge[k]->Integral()/2;
+  Double_t mu_0 = 2; //hist_mean_1;
+  Double_t q_0 = 1.6;
+  Double_t sigma_0 = 1.6*0.4;
+  Double_t expAmp_0 = 2.0;
+  Double_t expCoeff_0 = 2.0;
   
   // write initial parameters to output txt file
-  initparam[pmt][k]=
-    "voltage\t"+voltagestr[k]+"\t"
-    +"chID\t"+to_string(pmt)+"\t"       //channel id
-    +fitbeginch[pmt]+"\t"          //start fit
-    +fitendch[pmt]+"\t"            //end fit
-    +rebinfactor[pmt]+"\t"         //rebin factor
-    +mu_0[k]+"\t"                  //mu
-    +q_0[k]+"\t"                   //q
-    +sigma_0[k]+"\t"               //sigma
-    +amp_0[k];                     //amplitude
-  }
+  initparam[pmt]="chID\t"+to_string(pmt)+"\t"       //channel id
+    +fitbeginch[pmt]+"\t"         //start fit
+    +fitendch[pmt]+"\t"           //end fit
+    +rebinfactor[pmt]+"\t"        //rebin factor
+    +mu_0+"\t"           //mu
+    +q_0+"\t"                   //q
+    +sigma_0+"\t"               //sigma
+    +hCharge[0]->Integral()/2;  //amplitude
   
   // set ranges on fit parameters
-  fit_ideal_1->SetParameters(mu_0[0],q_0[0],sigma_0[0],amp_0[0]); 
-  fit_ideal_2->SetParameters(mu_0[1],q_0[1],sigma_0[1],amp_0[1]); 
-  fit_ideal_3->SetParameters(mu_0[2],q_0[2],sigma_0[2],amp_0[2]); 
+  fit_ideal_1->SetParameters(mu_0,q_0,sigma_0,hCharge[0]->Integral()/2);
+  fit_ideal_2->SetParameters(mu_0,q_0,sigma_0,hCharge[0]->Integral()/2);
+  fit_ideal_3->SetParameters(mu_0,q_0,sigma_0,hCharge[0]->Integral()/2); 
 
   // mu
   fit_ideal_1->SetParLimits(0,1,30);
@@ -289,9 +279,7 @@ void FitChargeDistributions_LC_ind(string pmtRow,
 
   // print initial parameters at end of root file
   foutFit << "**************************** INITIAL PARAMETERS ****************************" << endl;
-  for(int k = 0; k < 3; k++){
-    foutFit << initparam[pmt][k] << endl;
-  }
+  foutFit << initparam[pmt] << endl;
   
   // close output ROOT file
   outROOTfile->Close();

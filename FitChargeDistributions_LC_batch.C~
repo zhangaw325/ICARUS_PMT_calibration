@@ -76,8 +76,8 @@ const  ROOT::Math::IMultiGenFunction * fChi2_3;
 
 
 void FitChargeDistributions_LC_batch(string pmtRow,
-				     char pmt1, char pmt2, char pmt3, char pmt4,
-				     int volt1, int volt2, int volt3, bool led){
+				   char pmt1, char pmt2, char pmt3, char pmt4,
+				   int volt1, int volt2, int volt3, bool led){
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
@@ -87,7 +87,7 @@ void FitChargeDistributions_LC_batch(string pmtRow,
   int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
   double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
   double fitendch[NCH] = {fec_0, fec_0, fec_0, fec_0}; // fit end locations
-  string initparam[4][3];
+  string initparam[4];
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
@@ -99,53 +99,53 @@ void FitChargeDistributions_LC_batch(string pmtRow,
   */
   double par[NPAR_i];
   double parerr[NPAR_i];
-  // process 3 files in a batch
-  string rtfilenames[3];
-  string resultnames[4];
-  double channelnames[4] = {0,1,2,3};
-  string strchimney = pmtRow + "_PMT_";
-  string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
-  string voltagestr[3] = {to_string(volt1), to_string(volt2), to_string(volt3)};
-  string ledstr;
-  if(led)
-    ledstr = "On";
-  else
-    ledstr = "Off";
+    // process 3 files in a batch
+    string rtfilenames[3];
+    string resultnames[4];
+    double channelnames[4] = {0,1,2,3};
+    string strchimney = pmtRow + "_PMT_";
+    string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
+    string voltagestr[3] = {to_string(volt1), to_string(volt2), to_string(volt3)};
+    string ledstr;
+    if(led)
+      ledstr = "On";
+    else
+      ledstr = "Off";
   
-  for(int i=0; i<3; i++){
-    rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
-    cout << rtfilenames[i] << endl;
-  }
-  for(int i=0; i<4; i++){
-    resultnames[i]  = strchimney + strpmt + "CH" + channelnames[i] + "_"
-      + "Led" + ledstr + "_lowcharge.pdf";
-    cout << resultnames[i] <<endl;
-  }
+    for(int i=0; i<3; i++){
+      rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
+      cout << rtfilenames[i] << endl;
+    }
+    for(int i=0; i<4; i++){
+      resultnames[i]  = strchimney + strpmt + "CH" + channelnames[i] + "_"
+	+ "Led" + ledstr + "_lowcharge.pdf";
+      cout << resultnames[i] <<endl;
+    }
     
-  string outnameroot = strchimney + strpmt + "lowcharge_gain_.root";
-  string outnametxt = strchimney + strpmt + "lowcharge_gain_fit.txt";
-  TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
-  fstream foutFit(outnametxt.c_str(),ios::out);
-  TH1F* hCharge[3]; // histograms for each canvas
-  TCanvas* c[4];
-  char tempname[100];
+    string outnameroot = strchimney + strpmt + "lowcharge_gain_.root";
+    string outnametxt = strchimney + strpmt + "lowcharge_gain_fit.txt";
+    TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
+    fstream foutFit(outnametxt.c_str(),ios::out);
+    TH1F* hCharge[3]; // histograms for each canvas
+    TCanvas* c[4];
+    char tempname[100];
 
-  TFile* files[3];
+    TFile* files[3];
   
-  // Read each of the three data ROOT files and save them to files[]
-  for(int i = 0; i < 3; i++){
-    files[i] = new TFile(rtfilenames[i].c_str(),"read");
-  }
+    // Read each of the three data ROOT files and save them to files[]
+    for(int i = 0; i < 3; i++){
+      files[i] = new TFile(rtfilenames[i].c_str(),"read");
+    }
 
-  ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(5000);
+    ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(5000);
 
-  // Print header
-  foutFit << "**************************** PARAMETER VALUES ****************************" << endl;
+    // Print header
+    foutFit << "**************************** PARAMETER VALUES ****************************" << endl;
 
-  //*************************
-  // Begin fit
-  //*************************
-  for(int i = 0; i < 4; i++){
+    //*************************
+    // Begin fit
+    //*************************
+    for(int i = 0; i < 4; i++){
     // generate histograms
     sprintf(tempname, "Results/FinalCharge_%d",i);
     for(int j = 0; j < 3; j++){
@@ -169,38 +169,28 @@ void FitChargeDistributions_LC_batch(string pmtRow,
     fit_ideal_3->SetLineColor(2);
     fit_ideal_3->SetLineStyle(1);
   
-    // default parameters
+    // initial parameters
     Double_t hist_mean_1 = truncatedMean(hCharge[1], 10);
-    Double_t mu_def = hist_mean_1;
-    Double_t q_def = 1.6;
-    Double_t sigma_def = 1.6*0.4;
-
-    // initial parameters for each voltage
-    // ****** CHANGE THESE ARRAY VALUES TO RECORD TO OUTPUT *******
-    Double_t mu_0[3], q_0[3], sigma_0[3], amp_0[3];
-    for(int k = 0; k < 3; k++){
-      mu_0[k] = mu_def;
-      q_0[k] = q_def;
-      sigma_0[k] = sigma_def;
-      amp_0[k] = hCharge[k]->Integral()/2;
-
-      // write initial parameters to output txt file
-      initparam[i][k]=
-	"voltage\t"+voltagestr[k]+"\t"
-	+"chID\t"+to_string(i)+"\t"  //channel id
-	+fitbeginch[i]+"\t"          //start fit
-	+fitendch[i]+"\t"            //end fit
-	+rebinfactor[i]+"\t"         //rebin factor
-	+mu_0[k]+"\t"                  //mu
-	+q_0[k]+"\t"                   //q
-	+sigma_0[k]+"\t"               //sigma
-	+amp_0[k];  //amplitude
-    }
+    Double_t mu_0 = 2; //hist_mean_1;
+    Double_t q_0 = 1.6;
+    Double_t sigma_0 = 1.6*0.4;
+    Double_t expAmp_0 = 2.0;
+    Double_t expCoeff_0 = 2.0;
+  
+    // write initial parameters to output txt file
+    initparam[i]="chID\t"+to_string(i)+"\t"       //channel id
+      +fitbeginch[i]+"\t"         //start fit
+      +fitendch[i]+"\t"           //end fit
+      +rebinfactor[i]+"\t"        //rebin factor
+      +mu_0+"\t"           //mu
+      +q_0+"\t"                   //q
+      +sigma_0+"\t"               //sigma
+      +hCharge[0]->Integral()/2;  //amplitude
   
     // set ranges on fit parameters
-   fit_ideal_1->SetParameters(mu_0[0],q_0[0],sigma_0[0],amp_0[0]); 
-   fit_ideal_2->SetParameters(mu_0[1],q_0[1],sigma_0[1],amp_0[1]); 
-   fit_ideal_3->SetParameters(mu_0[2],q_0[2],sigma_0[2],amp_0[2]); 
+    fit_ideal_1->SetParameters(mu_0,q_0,sigma_0,hCharge[0]->Integral()/2);
+    fit_ideal_2->SetParameters(mu_0,q_0,sigma_0,hCharge[0]->Integral()/2);
+    fit_ideal_3->SetParameters(mu_0,q_0,sigma_0,hCharge[0]->Integral()/2); 
 
     // mu
     fit_ideal_1->SetParLimits(0,1,30);
@@ -286,15 +276,13 @@ void FitChargeDistributions_LC_batch(string pmtRow,
     outROOTfile->cd();
     c[i]->Write();
     c[i]->Print(resultnames[i].c_str(),"pdf");
-  }
-    
-  // print initial parameters at end of root file
-  foutFit << "**************************** INITIAL PARAMETERS ****************************" << endl;
-  for(int i = 0; i < 4; i++){
-    for(int k = 0; k < 3; k++){
-      foutFit << initparam[i][k] << endl;
     }
-  }
+    
+    // print initial parameters at end of root file
+    foutFit << "**************************** INITIAL PARAMETERS ****************************" << endl;
+    for(int i = 0; i < 4; i++){
+      foutFit << initparam[i] << endl;
+    }
   
   // close output ROOT file
   outROOTfile->Close();
