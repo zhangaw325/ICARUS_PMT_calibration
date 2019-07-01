@@ -12,6 +12,7 @@
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TMath.h"
+#include "TFile.h"
 
 #include <fstream>
 
@@ -26,17 +27,18 @@ void GainVoltage(string chimney){
   int NPAR = 2;        // number of parameters
   
   // output files
-  string outnametxt[10];
   string outnamepdf[10];
 
   for(int i = 0; i < NPMT; i++){
-    outnametxt[i] = chimney + "_" + to_string(i + 1) + "_gainvsvoltage.txt";
     outnamepdf[i] = chimney + "_" + to_string(i + 1) + "_gainvsvoltage.pdf";
   }
 
+  string outnametxt = chimney + "_gainvsvoltage.txt";
   string outnameroot = chimney + "_gainvsvoltage.root";
   TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
   fstream fout(outnametxt.c_str(),ios::out);
+
+  TCanvas *c[NPMT];
 
   for(int pmt_num = 0; pmt_num < NPMT; pmt_num++){
 
@@ -54,7 +56,7 @@ void GainVoltage(string chimney){
     int num_data_points = 0;
 
     while (input_file >> p >> v >> g >> ge){
-      if (p == pmt_num){
+      if (p == pmt_num + 1){
         voltage_raw[num_data_points] = v;
         gain_raw[num_data_points] = g;
         gain_error_raw[num_data_points] = ge;
@@ -91,9 +93,9 @@ void GainVoltage(string chimney){
     fit->SetLineStyle(1);
     
     // Create canvas
-    auto c1 = new TCanvas("c1","c1",200,10,600,400);
-    c1->SetGrid();
-    c1->GetFrame()->SetBorderSize(12);
+    c[pmt_num] = new TCanvas("c1","c1",200,10,600,400);
+    c[pmt_num]->SetGrid();
+    c[pmt_num]->GetFrame()->SetBorderSize(12);
 
     // Create graph of data
     TGraph* data = new TGraphErrors(num_data_points, voltage, gain, voltage_error, gain_error);
@@ -102,6 +104,7 @@ void GainVoltage(string chimney){
                     + "log(gain)";
     data->SetTitle(title.c_str());
     data->SetMarkerStyle(kCircle);
+
     // Fit
     fit->SetParameters(0.003,0.33);
     data->Fit("fit");
@@ -119,8 +122,8 @@ void GainVoltage(string chimney){
     data->Draw("ap");
 
     outROOTfile->cd();
-    c1->Write();
-    c1->Print(outnamepdf.c_str(),"pdf");
+    c[pmt_num]->Write();
+    c[pmt_num]->Print(outnamepdf[pmt_num].c_str(),"pdf");
   }
 }
 
