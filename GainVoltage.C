@@ -26,7 +26,7 @@ void GainVoltage(string chimney, Int_t pmt_num){
   // output files
   string outnametxt = chimney + "_" + to_string(pmt_num) + "_gainvsvoltage.txt";
   string outnameroot = chimney + "_" + to_string(pmt_num) + "_gainvsvoltage.root";
-  string outnamepdf = chimney + "_" + to_string(pmt_num) + "gainvsvoltage.pdf";
+  string outnamepdf = chimney + "_" + to_string(pmt_num) + "_gainvsvoltage.pdf";
   TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
   fstream fout(outnametxt.c_str(),ios::out);
 
@@ -35,6 +35,7 @@ void GainVoltage(string chimney, Int_t pmt_num){
   std::ifstream input_file(input_file_name);
 
   Double_t voltage_raw[6];
+  Double_t voltage_error_raw[6] = {2,2,2,2,2,2};
   Double_t gain_raw[6];
   Double_t gain_error_raw[6];
 
@@ -53,6 +54,7 @@ void GainVoltage(string chimney, Int_t pmt_num){
 
   // create properly sized arrays
   Double_t voltage[num_data_points];
+  Double_t voltage_error[num_data_points];
   Double_t gain[num_data_points];
   Double_t gain_error[num_data_points];
 
@@ -60,6 +62,7 @@ void GainVoltage(string chimney, Int_t pmt_num){
     voltage[i] = TMath::Log(voltage_raw[i]);
     gain[i] = TMath::Log(gain_raw[i]);
     gain_error[i] = gain_error_raw[i]/gain_raw[i];
+    voltage_error[i] = voltage_error_raw[i]/voltage_raw[i];
   }
 
   if(num_data_points != 3 && num_data_points != 6){
@@ -83,18 +86,17 @@ void GainVoltage(string chimney, Int_t pmt_num){
   c1->GetFrame()->SetBorderSize(12);
 
   // Create graph of data
-  TGraph* data = new TGraphErrors(num_data_points, voltage, gain, 0, gain_error);
-  string title = "PMT " + chimney + "_" + to_string(pmt_num) + "gain vs voltage;";
-  data->SetTitle( title
-		              "Voltage [V];"
-		              "Gain");
+  TGraph* data = new TGraphErrors(num_data_points, voltage, gain, voltage_error, gain_error);
+  string title =  "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage;"
+                  + "log(voltage [V]);"
+                  + "log(gain)";
+  data->SetTitle(title.c_str());
   data->SetMarkerStyle(kCircle);
   // Fit
   fit->SetParameters(0.003,0.33);
   data->Fit("fit");
   gStyle->SetOptFit();
   fit->GetParameters(par);
-  fout << 
   fout<<"\t"<<par[0]<<"\t"<<fit->GetParError(0)
        <<"\t"<<par[1]<<"\t"<<fit->GetParError(1)
        <<"\t"<<par[2]<<"\t"<<fit->GetParError(2)
