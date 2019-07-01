@@ -7,17 +7,6 @@ import peakutils
 
 import sys # for command-line input
 
-# for me to pick
-# A10_PMT_1_2_3_4_1520V_LedOff
-# A10_PMT_1_2_3_4_1520V_LedOn
-# A10_PMT_1_2_3_4_1580V_LedOff
-# C18_PMT_1_2_3_4_1500V_LedOn
-# C18_PMT_1_2_3_4_1500V_LedOff
-# C18_PMT_5_6_7_8_1500V_LedOn
-# C18_PMT_5_6_7_8_1500V_longCablesIn56
-# C18_PMT_5_6_7_8_comp_longCable_use_darkTrig
-# C18_PMT_5_6_7_8_1500V_LedOff
-
 #some input
 tempStr = "filelist_"
 filehead = sys.argv[1] # ask user for data directory input
@@ -41,19 +30,10 @@ NSamples = 12500 # number of data points in one waveform
 tpt = 1.6 # time interval between sample points, in ns.
 NCH = 4  # number of PMTs
 QFactor = tpt/50.0*1000.0 # convert V*ns/50Ohm to charge in pC
-Nsigma = 5
-#Nwaves = 2000 # number of waveforms taken for a PMT
+Nsigma = 10
 
-Nwaves = len(open(filelistStr).readlines(  ))/4 # unclear why this is divided by 4
+Nwaves = len(open(filelistStr).readlines(  ))/4 # divided by 4 because 4 PMTs in group
 print "number of waveforms in this run: ", Nwaves
-#quit()
-
-#print "Waveform static file information:"
-#print pCode[0]
-#print "version number ", vNumber
-#print "number of digits in byte count", ndbc
-#print "number of bytes to EOF ", nbEOF[0]
-#print "number of bytes per point", nbPt
 
 def decode_wfm(filename):
     #awave1 = np.zeros(NSamples)
@@ -406,7 +386,7 @@ def main():
 
             baseline_mean = np.average(awave[NSamples-1000:NSamples])
             baseline_width = np.std(awave[NSamples-1000:NSamples])
-            threshold = -baseline_mean - Nsigma*baseline_width
+            threshold = baseline_mean - Nsigma*baseline_width
             hPedMean_list[ch].Fill(baseline_mean)
             hPedWidth_list[ch].Fill(baseline_width)
             TimeBinOfAmplitude = np.argmin(awave[70:800]) + 70
@@ -436,7 +416,7 @@ def main():
             hFinalCharge_list[ch].Fill(-1.0*fC)
 
             # search for number of pulses 
-            peakindex = peakutils.peak.indexes(-1.0*awave[0:NSamples],thres=abs(threshold), min_dist=31, thres_abs=True)
+            peakindex = peakutils.peak.indexes(-1.0*awave[0:NSamples],thres=-1.0*threshold, min_dist=31, thres_abs=True)
             for pulse_i in range(len(peakindex)):
 
                 # skip pulse if it is below threshold in magnitude

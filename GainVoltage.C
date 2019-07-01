@@ -58,8 +58,8 @@ void GainVoltage(string chimney){
     while (input_file >> p >> v >> g >> ge){
       if (p == pmt_num + 1){
         voltage_raw[num_data_points] = v;
-        gain_raw[num_data_points] = g;
-        gain_error_raw[num_data_points] = ge;
+        gain_raw[num_data_points] = g*pow(10,7);
+        gain_error_raw[num_data_points] = ge*pow(10,7);
         num_data_points++;
       }
     }
@@ -116,7 +116,7 @@ void GainVoltage(string chimney){
 
     // Create graph of data
     TGraph* data = new TGraphErrors(num_data_points, voltage, gain, voltage_error, gain_error);
-    string title =  "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (log);"
+    string title =  "PMT " + chimney + "_" + to_string(pmt_num + 1) + " gain vs voltage (log);"
                     + "log(voltage [V]);"
                     + "log(gain)";
     data->SetTitle(title.c_str());
@@ -129,12 +129,22 @@ void GainVoltage(string chimney){
     fit->GetParameters(par);
     Double_t constant = par[0];
     Double_t exponent = par[1];
-    //fout << "PMT" << "\t" << pmt_num + 1 
-    fout << constant <<"\t"<<fit->GetParError(0)
-         << "\t" << exponent <<"\t"<<fit->GetParError(1)
-         << "\t" << fit->GetChisquare()
-         << "\t" << fit->GetNDF()
-         << "\t" << fit->GetProb()
+    Double_t amplitude = TMath::Exp(constant); 
+    // spacer lines
+    for(int j = 0; j < 2; j++){
+      fout  << "--" << ",\t" << "--"
+            << ",\t" << "--" << ",\t" << "--"
+            << ",\t" << "--"
+            << ",\t" << "--"
+            << ",\t" << "--"
+            << endl;
+    }
+    //fout << "PMT" << "\t" << pmt_num + 1
+    fout << constant <<",\t"<<fit->GetParError(0)
+         << ",\t" << exponent <<",\t"<<fit->GetParError(1)
+         << ",\t" << fit->GetChisquare()
+         << ",\t" << fit->GetNDF()
+         << ",\t" << fit->GetProb()
          <<endl;
 
     // Plot gain and voltage
@@ -149,7 +159,7 @@ void GainVoltage(string chimney){
     TGraph *dataLinear = new TGraphErrors(  num_data_points, voltage_nolog, 
                                         gain_nolog, voltage_error_nolog, 
                                         gain_error_nolog);
-    title = "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (linear);"
+    title = "PMT " + chimney + "_" + to_string(pmt_num + 1) + " gain vs voltage (linear);"
                    + "voltage [V];"
                    + "gain";
     dataLinear->SetTitle(title.c_str());
