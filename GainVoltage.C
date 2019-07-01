@@ -93,7 +93,10 @@ void GainVoltage(string chimney){
     fit->SetLineStyle(1);
     
     // Create canvas
-    c[pmt_num] = new TCanvas("c1","c1",200,10,600,400);
+    char tempname[100];
+    sprintf(tempname, "c_%d",pmt_num);
+    string canvasTitle = chimney + "_" + to_string(pmt_num + 1);
+    c[pmt_num] = new TCanvas(tempname,canvasTitle.c_str(),200,10,600,400);
     c[pmt_num]->SetGrid();
     c[pmt_num]->GetFrame()->SetBorderSize(12);
 
