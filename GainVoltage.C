@@ -70,11 +70,21 @@ void GainVoltage(string chimney){
     Double_t gain[num_data_points];
     Double_t gain_error[num_data_points];
 
+    Double_t voltage_nolog[num_data_points];
+    Double_t voltage_error_nolog[num_data_points];
+    Double_t gain_nolog[num_data_points];
+    Double_t gain_error_nolog[num_data_points];
+
     for(int i = 0; i < num_data_points; i++){
       voltage[i] = TMath::Log(voltage_raw[i]);
       gain[i] = TMath::Log(gain_raw[i]);
       gain_error[i] = gain_error_raw[i]/gain_raw[i];
       voltage_error[i] = voltage_error_raw[i]/voltage_raw[i];
+
+      voltage_nolog[i] = voltage_raw[i];
+      voltage_error_nolog[i] = voltage_error_raw[i];
+      gain_nolog[i] = gain_raw[i];
+      gain_error_nolog[i] = gain_error_raw[i];
     }
 
     if(num_data_points != 3 && num_data_points != 6){
@@ -93,13 +103,20 @@ void GainVoltage(string chimney){
     fit->SetLineStyle(1);
     
     // Create canvas
-    c[pmt_num] = new TCanvas("c1","c1",200,10,600,400);
+    char tempname[100];
+    sprintf(tempname, "c_%d",pmt_num);
+    string canvasTitle = chimney + "_" + to_string(pmt_num + 1);
+    c[pmt_num] = new TCanvas(tempname,canvasTitle.c_str(),200,10,600,800);
+    c[pmt_num]->Divide(1,2);
+
+    // Create fit graph of data
+    c[pmt_num]->cd(1);
     c[pmt_num]->SetGrid();
     c[pmt_num]->GetFrame()->SetBorderSize(12);
 
     // Create graph of data
     TGraph* data = new TGraphErrors(num_data_points, voltage, gain, voltage_error, gain_error);
-    string title =  "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage;"
+    string title =  "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (log);"
                     + "log(voltage [V]);"
                     + "log(gain)";
     data->SetTitle(title.c_str());
@@ -110,17 +127,43 @@ void GainVoltage(string chimney){
     data->Fit("fit");
     gStyle->SetOptFit();
     fit->GetParameters(par);
-    fout<<"\t"<<par[0]<<"\t"<<fit->GetParError(0)
-         <<"\t"<<par[1]<<"\t"<<fit->GetParError(1)
-         <<"\t"<<par[2]<<"\t"<<fit->GetParError(2)
-         <<"\t"<<fit->GetChisquare()
-         <<"\t"<<fit->GetNDF()
-         <<"\t"<<fit->GetProb()
+    Double_t constant = par[0];
+    Double_t exponent = par[1];
+    fout << "PMT" << "\t" << pmt_num + 1 
+         << "\t" << constant <<"\t"<<fit->GetParError(0)
+         << "\t" << exponent <<"\t"<<fit->GetParError(1)
+         << "\t" << fit->GetChisquare()
+         << "\t" << fit->GetNDF()
+         << "\t" << fit->GetProb()
          <<endl;
 
     // Plot gain and voltage
     data->Draw("ap");
 
+    // Create linear graph of data
+    c[pmt_num]->cd(2);
+    c[pmt_num]->SetGrid();
+    c[pmt_num]->GetFrame()->SetBorderSize(12);
+
+    // Plot points
+    TGraph *dataLinear = TGraphErrors(  num_data_points, voltage_nolog, 
+                                        gain_nolog, voltage_error_nolog, 
+                                        gain_error_nolog);
+    title = "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (linear);"
+                   + "voltage [V];"
+                   + "gain";
+    dataLinear->SetTitle(title.c_str());
+    dataLinear->SetMarkerStyle(kCircle);
+    dataLinear->Draw();
+
+    // Draw fit result
+    Double_t amplitude = TMath::Exp(constant/exponent);
+    TF1 *gainFunc = new TF1("gainfunc",power,1000,2000,2);
+    gainFunc->SetParameters(0,amplitude);
+    gainFunc->SetParameters(1,exponent);
+    gainFunc->Draw("SAME");
+
+    // Write output files
     outROOTfile->cd();
     c[pmt_num]->Write();
     c[pmt_num]->Print(outnamepdf[pmt_num].c_str(),"pdf");
@@ -128,7 +171,7 @@ void GainVoltage(string chimney){
 }
 
 // Power law function definition: a * (x ^ k)
-double power(double* x, double* par){
+Double_t power(double* x, double* par){
   double k = par[0];
   double a = par[1];
   return k*TMath::Power(x[0],a);
