@@ -106,7 +106,7 @@ void GainVoltage(string chimney){
     char tempname[100];
     sprintf(tempname, "c_%d",pmt_num);
     string canvasTitle = chimney + "_" + to_string(pmt_num + 1);
-    c[pmt_num] = new TCanvas(tempname,canvasTitle.c_str(),200,10,600,800);
+    c[pmt_num] = new TCanvas(tempname,canvasTitle.c_str(),200,10,600,700);
     c[pmt_num]->Divide(1,2);
 
     // Create fit graph of data
@@ -120,7 +120,7 @@ void GainVoltage(string chimney){
                     + "log(voltage [V]);"
                     + "log(gain)";
     data->SetTitle(title.c_str());
-    data->SetMarkerStyle(kCircle);
+    data->SetMarkerStyle(kOpenSquare);
 
     // Fit
     fit->SetParameters(0.003,0.33);
@@ -146,21 +146,21 @@ void GainVoltage(string chimney){
     c[pmt_num]->GetFrame()->SetBorderSize(12);
 
     // Plot points
-    TGraph *dataLinear = TGraphErrors(  num_data_points, voltage_nolog, 
+    TGraph *dataLinear = new TGraphErrors(  num_data_points, voltage_nolog, 
                                         gain_nolog, voltage_error_nolog, 
                                         gain_error_nolog);
     title = "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (linear);"
                    + "voltage [V];"
                    + "gain";
     dataLinear->SetTitle(title.c_str());
-    dataLinear->SetMarkerStyle(kCircle);
-    dataLinear->Draw();
+    dataLinear->SetMarkerStyle(kOpenSquare);
+    dataLinear->Draw("ap");
 
     // Draw fit result
-    Double_t amplitude = TMath::Exp(constant/exponent);
+    Double_t amplitude = TMath::Exp(constant);
     TF1 *gainFunc = new TF1("gainfunc",power,1000,2000,2);
-    gainFunc->SetParameters(0,amplitude);
-    gainFunc->SetParameters(1,exponent);
+    gainFunc->SetParameter(0,amplitude);
+    gainFunc->SetParameter(1,exponent);
     gainFunc->Draw("SAME");
 
     // Write output files
