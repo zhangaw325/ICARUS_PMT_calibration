@@ -129,8 +129,8 @@ void GainVoltage(string chimney){
     fit->GetParameters(par);
     Double_t constant = par[0];
     Double_t exponent = par[1];
-    fout << "PMT" << "\t" << pmt_num + 1 
-         << "\t" << constant <<"\t"<<fit->GetParError(0)
+    //fout << "PMT" << "\t" << pmt_num + 1 
+    fout << constant <<"\t"<<fit->GetParError(0)
          << "\t" << exponent <<"\t"<<fit->GetParError(1)
          << "\t" << fit->GetChisquare()
          << "\t" << fit->GetNDF()
@@ -157,7 +157,6 @@ void GainVoltage(string chimney){
     dataLinear->Draw("ap");
 
     // Draw fit result
-    Double_t amplitude = TMath::Exp(constant);
     TF1 *gainFunc = new TF1("gainfunc",power,1000,2000,2);
     gainFunc->SetParameter(0,amplitude);
     gainFunc->SetParameter(1,exponent);
