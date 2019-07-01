@@ -81,13 +81,26 @@ void FitChargeDistributions_LC_ind(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rbf_0 = 4;
+  int rbf_0 = 1;
   double fbc_0 = 0.50;
-  double fec_0 = 90.0;
-  int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
-  double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
-  double fitendch[NCH] = {fec_0, fec_0, fec_0, fec_0}; // fit end locations
-  string initparam[4][3];
+  double fec_0 = 40.0;
+ //******* CHANGE VALUES HERE TO BE WRITTEN TO OUTPUT FILE *******
+  // rebin histogram
+  int rebinfactor[NCH][3]={{rbf_0, rbf_0, rbf_0}, // pmt 0
+			   {rbf_0, rbf_0, rbf_0}, // pmt 1
+			   {rbf_0, rbf_0, rbf_0}, // pmt 2
+			   {rbf_0, rbf_0, rbf_0}};// pmt 3
+  // fit start locations
+  double fitbeginch[NCH][3]={{fbc_0, fbc_0, fbc_0}, // pmt 0
+			     {fbc_0, fbc_0, fbc_0}, // pmt 1
+			     {fbc_0, fbc_0, fbc_0}, // pmt 2
+			     {fbc_0, fbc_0, fbc_0}};// pmt 3
+  // fit end locations
+  double fitendch[NCH][3] = {{fec_0, fec_0, fec_0}, // pmt 0
+			     {fec_0, fec_0, fec_0}, // pmt 1
+			     {fec_0, fec_0, fec_0}, // pmt 2
+			     {fec_0, fec_0, fec_0}};// pmt 3
+  string initparam[NCH][3];
 
   // the function to be used to do fit
   gStyle->SetOptFit(1111);
@@ -151,27 +164,26 @@ void FitChargeDistributions_LC_ind(string pmtRow,
   for(int j = 0; j < 3; j++){
     hCharge[j] = (TH1F*)files[j]->Get(tempname);
     hCharge[j]->SetTitle((voltagestr[j] + "V").c_str());
-    hCharge[j]->Rebin(rebinfactor[pmt]);
+    hCharge[j]->Rebin(rebinfactor[pmt][j]);
     hCharge[j]->SetXTitle("Charge in pC, (10^{7} electrons = 1.6 pC)");
   }
   
   // generate fit functions
-  TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, fitbeginch[pmt], fitendch[pmt], NPAR_i);
+  TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, fitbeginch[pmt][0], fitendch[pmt][0], NPAR_i);
   fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
   fit_ideal_1->SetLineColor(2);
   fit_ideal_1->SetLineStyle(1);
-  TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, fitbeginch[pmt], fitendch[pmt], NPAR_i);
+  TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, fitbeginch[pmt][1], fitendch[pmt][1], NPAR_i);
   fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
   fit_ideal_2->SetLineColor(2);
   fit_ideal_2->SetLineStyle(1);
-  TF1* fit_ideal_3 = new TF1("fit_ideal_3",IdealResponse, fitbeginch[pmt], fitendch[pmt], NPAR_i);
+  TF1* fit_ideal_3 = new TF1("fit_ideal_3",IdealResponse, fitbeginch[pmt][2], fitendch[pmt][2], NPAR_i);
   fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
   fit_ideal_3->SetLineColor(2);
   fit_ideal_3->SetLineStyle(1);
   
   // default parameters
-  Double_t hist_mean_1 = truncatedMean(hCharge[1], 10);
-  Double_t mu_def = hist_mean_1;
+  //Double_t mu_def = hist_mean_1;
   Double_t q_def = 1.6;
   Double_t sigma_def = 1.6*0.4;
 
@@ -179,7 +191,7 @@ void FitChargeDistributions_LC_ind(string pmtRow,
   // ****** CHANGE THESE ARRAY VALUES TO RECORD TO OUTPUT *******
   Double_t mu_0[3], q_0[3], sigma_0[3], amp_0[3];
   for(int k = 0; k < 3; k++){
-    mu_0[k] = mu_def;
+    mu_0[k] = truncatedMean(hCharge[k],10);
     q_0[k] = q_def;
     sigma_0[k] = sigma_def;
     amp_0[k] = hCharge[k]->Integral()/2;
@@ -188,9 +200,9 @@ void FitChargeDistributions_LC_ind(string pmtRow,
   initparam[pmt][k]=
     "voltage\t"+voltagestr[k]+"\t"
     +"chID\t"+to_string(pmt)+"\t"       //channel id
-    +fitbeginch[pmt]+"\t"          //start fit
-    +fitendch[pmt]+"\t"            //end fit
-    +rebinfactor[pmt]+"\t"         //rebin factor
+    +fitbeginch[pmt][k]+"\t"          //start fit
+    +fitendch[pmt][k]+"\t"            //end fit
+    +rebinfactor[pmt][k]+"\t"         //rebin factor
     +mu_0[k]+"\t"                  //mu
     +q_0[k]+"\t"                   //q
     +sigma_0[k]+"\t"               //sigma
@@ -230,15 +242,15 @@ void FitChargeDistributions_LC_ind(string pmtRow,
   c[pmt]->Divide(3); // divide canvas into 3 pads along the width
   for(int j = 0; j < 3; j++){
     c[pmt]->cd(j+1);
-    hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[pmt]);
+    hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[pmt][j]);
     hCharge[j]->GetYaxis()->SetRangeUser(0, 400);
     gStyle->SetOptFit();
     if(j==0)
-      hCharge[0]->Fit("fit_ideal_1","","",fitbeginch[pmt],fitendch[pmt]);
+      hCharge[0]->Fit("fit_ideal_1","","",fitbeginch[pmt][j],fitendch[pmt][j]);
     else if(j==1)
-      hCharge[1]->Fit("fit_ideal_2","","",fitbeginch[pmt],fitendch[pmt]);
+      hCharge[1]->Fit("fit_ideal_2","","",fitbeginch[pmt][j],fitendch[pmt][j]);
     else
-      hCharge[2]->Fit("fit_ideal_3","","",fitbeginch[pmt],fitendch[pmt]);
+      hCharge[2]->Fit("fit_ideal_3","","",fitbeginch[pmt][j],fitendch[pmt][j]);
   }
   
  
