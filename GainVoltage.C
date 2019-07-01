@@ -129,6 +129,7 @@ void GainVoltage(string chimney){
     fit->GetParameters(par);
     Double_t constant = par[0];
     Double_t exponent = par[1];
+    Double_t amplitude = TMath::Exp(constant);
     //fout << "PMT" << "\t" << pmt_num + 1 
     fout << constant <<"\t"<<fit->GetParError(0)
          << "\t" << exponent <<"\t"<<fit->GetParError(1)
