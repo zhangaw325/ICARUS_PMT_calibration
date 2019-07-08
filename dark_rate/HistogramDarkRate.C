@@ -44,9 +44,9 @@ void HistogramDarkRate(	std::string input_file_name_1, std::string input_file_na
 	for(int i = 0; i < 4; i++){
 		std::string plot_title;
 		if(i == 0) plot_title = "Row A";
-		if(i == 1) plot_title = "Row B";
-		if(i == 2) plot_title = "Row C";
-		if(i == 3) plot_title = "Row D";
+		if(i == 1) plot_title = "Rows A + B";
+		if(i == 2) plot_title = "Rows A + B + C";
+		if(i == 3) plot_title = "Rows A + B + C + D";
 
 		hist[i] = new TH1F("dark_rates", plot_title.c_str(), 100, 0, 15);
 		hist[i]->SetXTitle("dark rate (kHz)");
@@ -82,9 +82,10 @@ void HistogramDarkRate(	std::string input_file_name_1, std::string input_file_na
 	}
 
 	stack->GetXaxis()->SetTitle("dark rate (kHz)");
+	stack->GetXaxis()->SetRangeUser(0, 12);
 	stack->GetYaxis()->SetTitle("proportion of PMTs");
 
-	gPad->BuildLegend(0.75,0.75,0.95,0.95,"");
+	gPad->BuildLegend(0.65,0.65,0.95,0.95,"");
 	canvas->Update();
 
 	output_file_root->cd();
