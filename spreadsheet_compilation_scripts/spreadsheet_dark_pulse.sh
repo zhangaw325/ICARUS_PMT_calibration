@@ -40,12 +40,13 @@ for file in "${offFiles[@]}"; do
 	if [ "$imod" -eq "0" ]
 	then
 		let "out_index==$i*4"
-		PMT_nums[$i]=$pmt0
-		let "j=$i+1"
+		let "j=4*$i/3"
+		PMT_nums[$j]=$pmt0
+		let "j=$j+1"
 		PMT_nums[$j]=$pmt1
-		let "j=$i+2"
+		let "j=$j+1"
 		PMT_nums[$j]=$pmt2
-		let "j=$i+3"
+		let "j=$j+1"
 		PMT_nums[$j]=$pmt3
 	fi
 
