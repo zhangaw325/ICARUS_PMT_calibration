@@ -81,8 +81,8 @@ void FitChargeDistributions_LC_ind(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rbf_0 = 1;
-  double fbc_0 = 0.50;
+  int rbf_0 = 2;
+  double fbc_0 = 0.5;
   double fec_0 = 40.0;
  //******* CHANGE VALUES HERE TO BE WRITTEN TO OUTPUT FILE *******
   // rebin histogram
