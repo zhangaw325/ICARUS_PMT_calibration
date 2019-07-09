@@ -78,8 +78,8 @@ void FitChargeDistributions(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rbf_0 = 5;
-  double fbc_0 = 2.0;
+  int rbf_0 = 1;
+  double fbc_0 = 1;
   double fec_0 = 90.0;
   int rebinfactor[NCH]={rbf_0, rbf_0, rbf_0, rbf_0}; // rebin histograms
   double fitbeginch[NCH]={fbc_0, fbc_0, fbc_0, fbc_0}; // fit start locations
@@ -168,7 +168,7 @@ void FitChargeDistributions(string pmtRow,
     fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
     fit_ideal_2->SetLineColor(2);
     fit_ideal_2->SetLineStyle(1);
-    TF1* fit_ideal_3 = new TF1("fit_ideal_1",IdealResponse, 0, 500, NPAR_i);
+    TF1* fit_ideal_3 = new TF1("fit_ideal_3",IdealResponse, 0, 500, NPAR_i);
     fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
     fit_ideal_3->SetLineColor(2);
     fit_ideal_3->SetLineStyle(1);
@@ -199,8 +199,6 @@ void FitChargeDistributions(string pmtRow,
     // initial parameters
     Double_t q_0 = 1.6;
     Double_t sigma_0 = 1.6*0.4;
-    Double_t expAmp_0 = 2.0;
-    Double_t expCoeff_0 = 2.0;
 
     // create fitter
     ROOT::Fit::Fitter fitter;
