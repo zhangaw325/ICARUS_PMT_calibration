@@ -116,7 +116,7 @@ void GainVoltage(string chimney){
 
     // Create graph of data
     TGraph* data = new TGraphErrors(num_data_points, voltage, gain, voltage_error, gain_error);
-    string title =  "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (log);"
+    string title =  "PMT " + chimney + "_" + to_string(pmt_num + 1) + " gain vs voltage (log);"
                     + "log(voltage [V]);"
                     + "log(gain)";
     data->SetTitle(title.c_str());
@@ -165,7 +165,7 @@ void GainVoltage(string chimney){
     TGraph *dataLinear = new TGraphErrors(  num_data_points, voltage_nolog, 
                                         gain_nolog, voltage_error_nolog, 
                                         gain_error_nolog);
-    title = "PMT " + chimney + "_" + to_string(pmt_num) + " gain vs voltage (linear);"
+    title = "PMT " + chimney + "_" + to_string(pmt_num + 1) + " gain vs voltage (linear);"
                    + "voltage [V];"
                    + "gain";
     dataLinear->SetTitle(title.c_str());
