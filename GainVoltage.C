@@ -89,7 +89,7 @@ void GainVoltage(string chimney){
 
     if(num_data_points != 3 && num_data_points != 6){
       cout << "Improper number of data points";
-      return;
+      continue;
     }
 
     // Define power law fit function
