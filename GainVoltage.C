@@ -88,7 +88,7 @@ void GainVoltage(string chimney){
     }
 
     if(num_data_points != 3 && num_data_points != 6){
-      cout << "Improper number of data points";
+      cout << "Improper number of data points for PMT " << pmt_num + 1 << ". SKIPPING" << endl;
       continue;
     }
 
