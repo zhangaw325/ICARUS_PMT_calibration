@@ -19,7 +19,7 @@ cd $DIR
 #echo $DIR
 
 #run python script
-LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-ubuntu18-gcc73-opt/lib/ PYTHONPATH=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-ubuntu18-gcc73-opt/lib python ProcessData_cl.py $dirDataName
+LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-ubuntu18-gcc73-opt/lib/ PYTHONPATH=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-ubuntu18-gcc73-opt/lib python ProcessData_cl_threshold.py $dirDataName > ${dirDataName}_output.txt
 
 #print message if successful
 echo "$dirDataName.root created"
