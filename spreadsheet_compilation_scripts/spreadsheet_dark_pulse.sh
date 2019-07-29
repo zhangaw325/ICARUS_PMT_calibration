@@ -38,14 +38,15 @@ for file in "${offFiles[@]}"; do
 
 	let "imod=$i%3"
 	if [ "$imod" -eq "0" ]
-	then
-		let "out_index==$i*4"
-		PMT_nums[$i]=$pmt0
-		let "j=$i+1"
+	then	
+		let "out_index=$i*4"
+		let "j=4*$i/3"
+		PMT_nums[$j]=$pmt0
+		let "j=$j+1"
 		PMT_nums[$j]=$pmt1
-		let "j=$i+2"
+		let "j=$j+1"
 		PMT_nums[$j]=$pmt2
-		let "j=$i+3"
+		let "j=$j+1"
 		PMT_nums[$j]=$pmt3
 	fi
 
@@ -76,13 +77,13 @@ for file in "${offFiles[@]}"; do
 
 	# output in proper order
 	out_nums[$out_index]=$pulse0
-	((out_index+=4))
+	((out_index+=3))
 	out_nums[$out_index]=$pulse1
-	((out_index+=4))
+	((out_index+=3))
 	out_nums[$out_index]=$pulse2
-	((out_index+=4))
+	((out_index+=3))
 	out_nums[$out_index]=$pulse3
-	((out_index+=4))
+	((out_index+=3))
 
 	# increment index
 	((i++))
@@ -93,6 +94,7 @@ function join_by { local IFS="$1"; shift; echo "$*"; }
 
 # print output and finish up
 echo "PMT numbers are ${PMT_nums[*]}"
+echo "Pulse values are ${out_nums[*]}"
 
 pmt_string=$(join_by _ "${PMT_nums[@]}")
 filename="${chimney}_darkpulses_${pmt_string}"

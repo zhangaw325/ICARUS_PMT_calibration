@@ -26,7 +26,7 @@ const int NPAR = NPAR_i*3-2;
 int ipar1[NPAR_i] = {  0, // common mu
 		       1, // q for hist 1
 		       2, // sigma for hist 1
-		       3, // amplitude for hist 1
+		       3 // amplitude for hist 1
 };
 
 int ipar2[NPAR_i] = {  0, // common mu
@@ -81,7 +81,7 @@ void FitChargeDistributions_LC_batch(string pmtRow,
 
   const int NCH = 4; // 4 PMTs
   // histogram and fit options
-  int rbf_0 = 3;
+  int rbf_0 = 2;
   double fbc_0 = 0.50;
   double fec_0 = 40.0;
   //******* CHANGE VALUES HERE TO BE WRITTEN TO OUTPUT FILE *******
@@ -102,14 +102,8 @@ void FitChargeDistributions_LC_batch(string pmtRow,
 			     {fec_0, fec_0, fec_0}};// pmt 3
   string initparam[NCH][3];
 
-  // the function to be used to do fit
   gStyle->SetOptFit(1111);
-  
-  /*
-    TF1* Fideal = new TF1("Fideal",IdealResponse, 0, 500, 6);
-    Fideal->SetParNames("meanNpe","spePeak","speWidth","Amplitude","expAmp","expCoeff");
-    Fideal->SetLineColor(2); Fideal->SetLineStyle(1);
-  */
+
   double par[NPAR_i];
   double parerr[NPAR_i];
   // process 3 files in a batch
@@ -245,15 +239,17 @@ void FitChargeDistributions_LC_batch(string pmtRow,
       hCharge[j]->GetXaxis()->SetRangeUser(0, fitendch[i][j]);
       hCharge[j]->GetYaxis()->SetRangeUser(0, 400);
       gStyle->SetOptFit();
-      if(j==0)
-	hCharge[0]->Fit("fit_ideal_1","","",fitbeginch[i][j],fitendch[i][j]);
-      else if(j==1)
-	hCharge[1]->Fit("fit_ideal_2","","",fitbeginch[i][j],fitendch[i][j]);
-      else
-	hCharge[2]->Fit("fit_ideal_3","","",fitbeginch[i][j],fitendch[i][j]);
+      if(j==0){
+	hCharge[j]->Fit("fit_ideal_1","","",fitbeginch[i][j],fitendch[i][j]);
+      }
+      else if(j==1){
+	hCharge[j]->Fit("fit_ideal_2","","",fitbeginch[i][j],fitendch[i][j]);
+      }
+      else if (j==2){
+	hCharge[j]->Fit("fit_ideal_3","","",fitbeginch[i][j],fitendch[i][j]);
+      }
     }
   
- 
     // Voltage 1
     fit_ideal_1->GetParameters(par);
     foutFit<<"voltage\t"<<voltagestr[0]<<"\tchID\t"<<i
