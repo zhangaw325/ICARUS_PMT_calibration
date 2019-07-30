@@ -31,9 +31,11 @@ tpt = 1.6  # time interval between sample points, in ns.
 NCH = 4  # number of PMTs
 QFactor = tpt / 50.0 * 1000.0  # convert V*ns/50Ohm to charge in pC
 Nsigma = 10
+afterpulse_cut = 480 # time after which to consider pulse an afterpulse, in ns
+afterpulse_cut_index = 480/tpt # index after which to consider a pulse an afterpulse
 
-Nwaves = len(open(filelistStr).readlines()) / \
-    4  # divided by 4 because 4 PMTs in group
+# divided by 4 because 4 PMTs in group
+Nwaves = len(open(filelistStr).readlines()) / 4
 print "number of waveforms in this run: ", Nwaves
 
 
@@ -398,6 +400,9 @@ def main():
     time2 = [0 for x in range(Nwaves)]
     for ch in range(NCH):
         for waveNb in range(Nwaves):
+        	# flag to determine whether there was afterpulse
+        	afterpulse_flag = False
+
             afilename = f.readline().rstrip()
             # print afilename
             # if waveNb>20:
@@ -442,10 +447,6 @@ def main():
             peakindex = peakutils.peak.indexes(
                 -1.0 * awave[0:NSamples], thres=-1.0 * threshold, min_dist=31, thres_abs=True)
 
-            # if there is more than one pulse, say there is afterpulse
-            if len(peakindex) > 1:
-                num_afterpulse_events[ch] += 1
-
             for pulse_i in range(len(peakindex)):
 
                 # skip pulse if it is below threshold in magnitude
@@ -476,6 +477,11 @@ def main():
                 hPulseAmplitudeVsWidth_list[ch].Fill(
                     (thiswidth + 2) * 2, -1000.0 * (awave[peakindex[pulse_i]] - baseline_mean))
 
+                # determine whether this occurred after an LED pulse
+                if peakindex[pulse_i] > afterpulse_cut_index:
+                	# if so, trigger the afterpulse flag
+                	afterpulse_flag = True
+
             if waveNb % 100 == 0:
                 # print ch, waveNb, afilename
                 for bin in range(0, NSamples, 1):
@@ -502,7 +508,11 @@ def main():
             for bin in range(0, NSamples, 1):
                 sumwave[ch][bin] += 1000.0 * (awave[bin] - baseline_mean)
 
-        # calculate afterpulse probability
+            # if afterpulse flag has been triggered, mark that an afterpulse occurred
+            if afterpulse_flag == True:
+            	num_afterpulse_events[ch] += 1.0
+
+        # calculate afterpulse probability for the channel
         afterpulse_probability[ch] = num_afterpulse_events[ch] / Nwaves
 
     for ch in range(NCH):
