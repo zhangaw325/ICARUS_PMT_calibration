@@ -11,7 +11,7 @@ read -p "Enter directory name you wish to anaylze: " dirDataName
 #change directory to aiwu database
 #ls all of the full-path names of the .wfm files
 #save it to a .txt file in the currentDir location
-cd /home/azhang/ICARUS/PMT/Data201905/$dirDataName
+cd /media/disk_a/ICARUS/PMT/$dirDataName
 find ~+ -type f -name "*.wfm" > $DIR/filelist_$dirDataName.txt
 #echo $DIR/filelist_$dirDataName.txt 
 
