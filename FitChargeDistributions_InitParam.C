@@ -1,8 +1,14 @@
 //*******************************************************************
 // Code adapts both FitChargeDistributions.C (high charge, simultaneous
 // fit) and FitChargeDistributions_LC_ind.C (low charge fit).
+//
 // The macro utilizes a .csv file containing initial parameters for
 // each PMT at three voltages in order to recreate the original fits.
+//
+// The .csv file must contain two headers of the following form:
+// ,,,,Initial parameters,,,,,,,,Flags
+// ROOT File Name,Chimney,PMT channel,Voltage,Fit Begin,Fit End, ...
+// ... Rebin Factor,Y Max,Mu (NPE),q (SPE),Sigma (SPE),Amplitude,Charge
 //*******************************************************************
 
 #include "TH1.h"
@@ -319,8 +325,9 @@ void fit_low(const string rootFile1, const string rootFile2, const string rootFi
     delete files[k];
   }
   
-  // close output ROOT file
+  // close output files
   outROOTfile->Close();
+  foutFit.close();
 }
 
 void fit_high(const string rootFile1, const string rootFile2, const string rootFile3,
@@ -588,8 +595,9 @@ void fit_high(const string rootFile1, const string rootFile2, const string rootF
     delete files[k];
   }
 
-  // close output ROOT file
+  // close output files
   outROOTfile->Close();
+  foutFit.close();
 }
 
 
@@ -683,7 +691,7 @@ void FitChargeDistributions_InitParam(string csvFile)
   tree->Branch(branchName[4],&begin,"begin/D");
   tree->Branch(branchName[5],&end,"end/D");
   tree->Branch(branchName[6],&rebin,"rebin/I");
-  tree->Branch(branchName[7],&ymax,"ymax/I");
+  tree->Branch(branchName[7],&ymax,"ymax/D");
   tree->Branch(branchName[8],&mu,"mu/D");
   tree->Branch(branchName[9],&q,"q/D");
   tree->Branch(branchName[10],&sigma,"sigma/D");
