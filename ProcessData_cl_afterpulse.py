@@ -400,9 +400,10 @@ def main():
     flag2 = [False for x in range(Nwaves)]
     time2 = [0 for x in range(Nwaves)]
     for ch in range(NCH):
-        for waveNb in range(Nwaves):
-        	# flag to determine whether there was afterpulse
-        	afterpulse_flag = False
+    	for waveNb in range(Nwaves):
+
+            # flag to determine whether there was afterpulse
+            afterpulse_flag = False
 
             afilename = f.readline().rstrip()
             awave = np.asarray(decode_wfm(afilename))
