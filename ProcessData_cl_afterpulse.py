@@ -31,8 +31,9 @@ tpt = 1.6  # time interval between sample points, in ns.
 NCH = 4  # number of PMTs
 QFactor = tpt / 50.0 * 1000.0  # convert V*ns/50Ohm to charge in pC
 Nsigma = 10
-afterpulse_cut = 480 # time after which to consider pulse an afterpulse, in ns
-afterpulse_cut_index = 480/tpt # index after which to consider a pulse an afterpulse
+afterpulse_cut = 480  # time after which to consider pulse an afterpulse, in ns
+# index after which to consider a pulse an afterpulse
+afterpulse_cut_index = 480 / tpt
 
 # divided by 4 because 4 PMTs in group
 Nwaves = len(open(filelistStr).readlines()) / 4
@@ -40,11 +41,11 @@ print "number of waveforms in this run: ", Nwaves
 
 
 def decode_wfm(filename):
-    #awave1 = np.zeros(NSamples)
+    # awave1 = np.zeros(NSamples)
     awave1 = []
-    #filename = "w-w-2nd-ch1-1200v-longCable-2ms_ch1_20190502101025236"
+    # filename = "w-w-2nd-ch1-1200v-longCable-2ms_ch1_20190502101025236"
     file_wfm = filename
-    #file_root = filename +".root"
+    # file_root = filename +".root"
     with open(file_wfm, "rb") as bfile:
         # read the first 2 bytes
         bfile.seek(0)
@@ -242,7 +243,7 @@ def decode_wfm(filename):
         temp = bfile.read(74)  # 74
         for i in range(NSamples):
             v = struct.unpack('h', bfile.read(2))
-            #awave1[i] = v[0]*DimScale[0]+DimOffset[0]
+            # awave1[i] = v[0]*DimScale[0]+DimOffset[0]
             awave1.append(v[0] * DimScale[0] + DimOffset[0])
             # print awave[i]
             # gWave.SetBinContent(i+1,v[0]*DimScale[0]+DimOffset[0])
@@ -404,9 +405,6 @@ def main():
         	afterpulse_flag = False
 
             afilename = f.readline().rstrip()
-            # print afilename
-            # if waveNb>20:
-            #    continue
             awave = np.asarray(decode_wfm(afilename))
 
             baseline_mean = np.average(awave[NSamples - 1000:NSamples])
@@ -424,7 +422,7 @@ def main():
                 time2[waveNb] = TimeBinOfAmplitude
 
             # get charge integration about the amplitude: 20.8 ns before to 36.8 ns after the amplitude
-            #sumcharge = 0.0
+            # sumcharge = 0.0
             # if TimeBinOfAmplitude>=168 and TimeBinOfAmplitude<=180:
             sumcharge = np.sum(
                 awave[TimeBinOfAmplitude - 13:TimeBinOfAmplitude + 23])
