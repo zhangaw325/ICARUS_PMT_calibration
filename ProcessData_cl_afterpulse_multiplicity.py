@@ -400,7 +400,7 @@ def main():
     flag2 = [False for x in range(Nwaves)]
     time2 = [0 for x in range(Nwaves)]
     for ch in range(NCH):
-    	for waveNb in range(Nwaves):
+        for waveNb in range(Nwaves):
 
             # flag to determine whether there was afterpulse
             afterpulse_flag = False
@@ -478,9 +478,9 @@ def main():
 
                 # determine whether this occurred after an LED pulse
                 if peakindex[pulse_i] > afterpulse_cut_index:
-                	# if so, trigger the afterpulse flag
-                	afterpulse_flag = True
-			num_afterpulse_events[ch] += 1.0
+                    # if so, trigger the afterpulse flag
+                    afterpulse_flag = True
+                    num_afterpulse_events[ch] += 1.0
 
             if waveNb % 100 == 0:
                 # print ch, waveNb, afilename
@@ -507,9 +507,6 @@ def main():
             # average of raw waveforms for each PMT
             for bin in range(0, NSamples, 1):
                 sumwave[ch][bin] += 1000.0 * (awave[bin] - baseline_mean)
-
-        # calculate afterpulse probability
-        afterpulse_probability[ch] = num_afterpulse_events[ch] / Nwaves
 
     for ch in range(NCH):
         for bin in range(NSamples):
@@ -549,9 +546,9 @@ def main():
     for i in range(0, NCH, 1):
         hNbOfPulses_list[i].Write()
 
-    # calculate and write afterpulse probabilities
+    # write afterpulse candidates
     for i in range(0, NCH, 1):
-        print "afterpulse probability: ", afterpulse_probability[i]
+        print "afterpulse candidates: ", num_afterpulse_events[i]
 
     hTimeDiff.Write()
     rtfileoutput.Close()
