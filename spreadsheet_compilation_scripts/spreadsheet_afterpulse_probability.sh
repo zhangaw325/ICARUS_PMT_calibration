@@ -23,7 +23,7 @@ for ind in {0..29}; do
 	out_nums[$ind]=0
 done
 
-for file in "${offFiles[@]}"; do
+for file in "${onFiles[@]}"; do
 	echo $file
 
 	# record PMT number ordering
