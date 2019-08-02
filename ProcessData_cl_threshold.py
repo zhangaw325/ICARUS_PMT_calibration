@@ -19,6 +19,8 @@ print("Analyzing data from " + filehead + ". Files listed in " + filelistStr)
 def isLEDOn(directoryName):
 	if directoryName.find("On") > -1:
 		return True
+	elif directoryName.find("ON") > -1:
+		return True
 	else:
 		return False
 
