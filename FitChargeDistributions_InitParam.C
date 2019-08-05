@@ -53,7 +53,7 @@ int ipar3[NPAR_i] = {  0,  // common mu
 double IdealResponse(double *x,double *par);
 Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3);
 bool fileExist (const std::string& name);
-void fit_low(const string rootFile1, const string rootFile2, const string rootFile3,
+string fit_low(const string rootFile1, const string rootFile2, const string rootFile3,
 	     const string pmtRow, const int pmt,
 	     const int volt1, const int volt2, const int volt3,
 	     const double * fitbeginch, const double * fitendch,
@@ -61,7 +61,7 @@ void fit_low(const string rootFile1, const string rootFile2, const string rootFi
 	     const double * mu_0, const double * q_0,
 	     const double * sigma_0, const double * amp_0
 	     );
-void fit_high(const string rootFile1, const string rootFile2, const string rootFile3,
+string fit_high(const string rootFile1, const string rootFile2, const string rootFile3,
 	      const string pmtRow, const int pmt,
 	      const int volt1, const int volt2, const int volt3,
 	      const double fbc_0, const double fec_0,
@@ -109,7 +109,7 @@ struct GlobalChi2 {
   const  ROOT::Math::IMultiGenFunction * fChi2_3;
 };
 
-void fit_low(const string rootFile1, const string rootFile2, const string rootFile3,
+string fit_low(const string rootFile1, const string rootFile2, const string rootFile3,
 	     const string pmtRow, const int pmt,
 	     const int volt1, const int volt2, const int volt3,
 	     const double * fitbeginch, const double * fitendch,
@@ -153,7 +153,7 @@ void fit_low(const string rootFile1, const string rootFile2, const string rootFi
   int version = 1;
   string pmtVersion = "v" + to_string(version) + "_";
   resultnames = strchimney + strpmt + pmtVersion + "lowcharge.pdf";
-  while(fileExist(resultnames)){
+  while(fileExist(resultnames) || fileExist(strchimney + strpmt + pmtVersion + "highcharge.pdf")){
     version ++;
     pmtVersion = "v" + to_string(version) + "_";
     resultnames = strchimney + strpmt + pmtVersion + "lowcharge.pdf";
@@ -193,15 +193,15 @@ void fit_low(const string rootFile1, const string rootFile2, const string rootFi
   
   // generate fit functions
   TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, fitbeginch[0], fitendch[0], NPAR_i);
-  fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+  fit_ideal_1->SetParNames("meanNpe","spePeak","speSigma","Amplitude");
   fit_ideal_1->SetLineColor(2);
   fit_ideal_1->SetLineStyle(1);
   TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, fitbeginch[1], fitendch[1], NPAR_i);
-  fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+  fit_ideal_2->SetParNames("meanNpe","spePeak","speSigma","Amplitude");
   fit_ideal_2->SetLineColor(2);
   fit_ideal_2->SetLineStyle(1);
   TF1* fit_ideal_3 = new TF1("fit_ideal_3",IdealResponse, fitbeginch[2], fitendch[2], NPAR_i);
-  fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+  fit_ideal_3->SetParNames("meanNpe","spePeak","speSigma","Amplitude");
   fit_ideal_3->SetLineColor(2);
   fit_ideal_3->SetLineStyle(1);
 
@@ -308,6 +308,38 @@ void fit_low(const string rootFile1, const string rootFile2, const string rootFi
 	 <<","<<fit_ideal_1->GetProb()
 	 <<endl;
 
+  // Output string
+  string output =to_string(pmt)
+    +","+resultnames
+    +","+to_string(fit_ideal_1->GetParameter(0))+","+to_string(fit_ideal_1->GetParError(0))
+    +","+to_string(fit_ideal_1->GetParameter(1))+","+to_string(fit_ideal_1->GetParError(1))
+    +","+to_string(fit_ideal_1->GetParameter(2))+","+to_string(fit_ideal_1->GetParError(2))
+    +","+to_string(fit_ideal_1->GetParameter(3))+","+to_string(fit_ideal_1->GetParError(3))
+    +","+to_string(fit_ideal_1->GetChisquare())
+    +","+to_string(fit_ideal_1->GetNDF())
+    +","+to_string(fit_ideal_1->GetProb())
+    +"\n"
+    +to_string(pmt)
+    +","+resultnames
+    +","+to_string(fit_ideal_2->GetParameter(0))+","+to_string(fit_ideal_2->GetParError(0))
+    +","+to_string(fit_ideal_2->GetParameter(1))+","+to_string(fit_ideal_2->GetParError(1))
+    +","+to_string(fit_ideal_2->GetParameter(2))+","+to_string(fit_ideal_2->GetParError(2))
+    +","+to_string(fit_ideal_2->GetParameter(3))+","+to_string(fit_ideal_2->GetParError(3))
+    +","+to_string(fit_ideal_2->GetChisquare())
+    +","+to_string(fit_ideal_2->GetNDF())
+    +","+to_string(fit_ideal_2->GetProb())
+    +"\n"
+    +to_string(pmt)
+    +","+resultnames
+    +","+to_string(fit_ideal_3->GetParameter(0))+","+to_string(fit_ideal_3->GetParError(0))
+    +","+to_string(fit_ideal_3->GetParameter(1))+","+to_string(fit_ideal_3->GetParError(1))
+    +","+to_string(fit_ideal_3->GetParameter(2))+","+to_string(fit_ideal_3->GetParError(2))
+    +","+to_string(fit_ideal_3->GetParameter(3))+","+to_string(fit_ideal_3->GetParError(3))
+    +","+to_string(fit_ideal_3->GetChisquare())
+    +","+to_string(fit_ideal_3->GetNDF())
+    +","+to_string(fit_ideal_3->GetProb())
+    +"\n";
+  
   //*************************
   // End fit
   //*************************
@@ -328,9 +360,12 @@ void fit_low(const string rootFile1, const string rootFile2, const string rootFi
   // close output files
   outROOTfile->Close();
   foutFit.close();
+
+  // return string with three lines of final parameters
+  return output;
 }
 
-void fit_high(const string rootFile1, const string rootFile2, const string rootFile3,
+string fit_high(const string rootFile1, const string rootFile2, const string rootFile3,
 	      const string pmtRow, const int pmt,
 	      const int volt1, const int volt2, const int volt3,
 	      const double fbc_0, const double fec_0,
@@ -341,7 +376,7 @@ void fit_high(const string rootFile1, const string rootFile2, const string rootF
   
   // histogram and fit options
   int rebinfactor = rbf_0; // rebin histograms
-  double fitbeginch = rbf_0; // fit start locations
+  double fitbeginch = fbc_0; // fit start locations
   double fitendch = fec_0; // fit end locations
   string initparam[3];
 
@@ -376,7 +411,7 @@ void fit_high(const string rootFile1, const string rootFile2, const string rootF
   int version = 1;
   string pmtVersion = "v" + to_string(version) + "_";
   resultnames = strchimney + strpmt + pmtVersion + "highcharge.pdf";
-  while(fileExist(resultnames)){
+  while(fileExist(resultnames) || fileExist(strchimney + strpmt + pmtVersion + "lowcharge.pdf")){
     version ++;
     pmtVersion = "v" + to_string(version) + "_";
     resultnames = strchimney + strpmt + pmtVersion + "highcharge.pdf";
@@ -422,15 +457,15 @@ void fit_high(const string rootFile1, const string rootFile2, const string rootF
   
   // generate fit functions
   TF1* fit_ideal_1 = new TF1("fit_ideal_1",IdealResponse, 0, 500, NPAR_i);
-  fit_ideal_1->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+  fit_ideal_1->SetParNames("meanNpe","spePeak","speSigma","Amplitude");
   fit_ideal_1->SetLineColor(2);
   fit_ideal_1->SetLineStyle(1);
   TF1* fit_ideal_2 = new TF1("fit_ideal_2",IdealResponse, 0, 500, NPAR_i);
-  fit_ideal_2->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+  fit_ideal_2->SetParNames("meanNpe","spePeak","speSigma","Amplitude");
   fit_ideal_2->SetLineColor(2);
   fit_ideal_2->SetLineStyle(1);
   TF1* fit_ideal_3 = new TF1("fit_ideal_3",IdealResponse, 0, 500, NPAR_i);
-  fit_ideal_3->SetParNames("meanNpe","spePeak","speWidth","Amplitude");
+  fit_ideal_3->SetParNames("meanNpe","spePeak","speSigma","Amplitude");
   fit_ideal_3->SetLineColor(2);
   fit_ideal_3->SetLineStyle(1);
   
@@ -577,6 +612,38 @@ void fit_high(const string rootFile1, const string rootFile2, const string rootF
 	 <<","<<fit_ideal_1->GetNDF()
 	 <<","<<fit_ideal_1->GetProb()
 	 <<endl;
+
+  // Output string
+  string output =to_string(pmt)
+    +","+resultnames
+    +","+to_string(fit_ideal_1->GetParameter(0))+","+to_string(fit_ideal_1->GetParError(0))
+    +","+to_string(fit_ideal_1->GetParameter(1))+","+to_string(fit_ideal_1->GetParError(1))
+    +","+to_string(fit_ideal_1->GetParameter(2))+","+to_string(fit_ideal_1->GetParError(2))
+    +","+to_string(fit_ideal_1->GetParameter(3))+","+to_string(fit_ideal_1->GetParError(3))
+    +","+to_string(fit_ideal_1->GetChisquare())
+    +","+to_string(fit_ideal_1->GetNDF())
+    +","+to_string(fit_ideal_1->GetProb())
+    +"\n"
+    +to_string(pmt)
+    +","+resultnames
+    +","+to_string(fit_ideal_2->GetParameter(0))+","+to_string(fit_ideal_2->GetParError(0))
+    +","+to_string(fit_ideal_2->GetParameter(1))+","+to_string(fit_ideal_2->GetParError(1))
+    +","+to_string(fit_ideal_2->GetParameter(2))+","+to_string(fit_ideal_2->GetParError(2))
+    +","+to_string(fit_ideal_2->GetParameter(3))+","+to_string(fit_ideal_2->GetParError(3))
+    +","+to_string(fit_ideal_2->GetChisquare())
+    +","+to_string(fit_ideal_2->GetNDF())
+    +","+to_string(fit_ideal_2->GetProb())
+    +"\n"
+    +to_string(pmt)
+    +","+resultnames
+    +","+to_string(fit_ideal_3->GetParameter(0))+","+to_string(fit_ideal_3->GetParError(0))
+    +","+to_string(fit_ideal_3->GetParameter(1))+","+to_string(fit_ideal_3->GetParError(1))
+    +","+to_string(fit_ideal_3->GetParameter(2))+","+to_string(fit_ideal_3->GetParError(2))
+    +","+to_string(fit_ideal_3->GetParameter(3))+","+to_string(fit_ideal_3->GetParError(3))
+    +","+to_string(fit_ideal_3->GetChisquare())
+    +","+to_string(fit_ideal_3->GetNDF())
+    +","+to_string(fit_ideal_3->GetProb())
+    +"\n";
   
   //*************************
   // End fit
@@ -598,6 +665,9 @@ void fit_high(const string rootFile1, const string rootFile2, const string rootF
   // close output files
   outROOTfile->Close();
   foutFit.close();
+
+  // return output
+  return output;
 }
 
 
@@ -678,9 +748,9 @@ void FitChargeDistributions_InitParam(string csvFile)
   // File handling
   ifstream inputFile;
   inputFile.open(csvFile.c_str());
-  string treeName = "fitTree";
-  string outputName = treeName + ".root";
-  TFile *outputFile = new TFile(outputName.c_str(), "RECREATE");
+  string treeName = csvFile.substr(0,csvFile.find(".csv"));
+  string rootOutputName = treeName + ".root";
+  TFile *rootOutputFile = new TFile(rootOutputName.c_str(), "RECREATE");
   TTree *tree =  new TTree(treeName.c_str(),treeName.c_str());
   
   // Instantiate branches
@@ -734,12 +804,23 @@ void FitChargeDistributions_InitParam(string csvFile)
     }
   }
   
-  outputFile->Write();
-  cout << csvFile << " saved as " << outputName << endl;
+  rootOutputFile->Write();
+
+  // Output file with all final parameters written
+  string txtOutputFile = treeName + ".txt";
+  fstream fout(txtOutputFile,ios::out);
+  fout << "pmt,pdf_name,mean_npe,mean_npe_err,spe_mean,spe_mean_err,spe_sigma,spe_sigma_err,amplitude,amplitude_err,chi2,ndf,fit_probability"<<endl;
   
   // Initial parameter storage structures used to pass data into fit function
   InitParam ip[3];
- 
+
+  // Tracks current chimney; sets initial value
+  Char_t currentChim[500];
+  tree->GetEvent(0);
+  memset(currentChim, 0, 500);
+  strncpy(currentChim, chimney, 500);
+  fout << currentChim << ",,,,,,,,,,,," << endl;
+  
   // Loop over all entries of the TTree accessing data in groups of 3.
   int count = 0;
   while (count < tree->GetEntries()) {
@@ -748,9 +829,12 @@ void FitChargeDistributions_InitParam(string csvFile)
       memset(chargeDataFile, 0, 500);
       memset(chimney, 0, 500);
       tree->GetEvent(count);
-      //tree->Show(count);
       ip[i].root = chargeDataFile;
       ip[i].chim = chimney;
+      if(strcmp(currentChim,chimney) != 0){
+	strncpy(currentChim, chimney, 500);
+	fout << currentChim << ",,,,,,,,,,,," << endl;
+      }
       ip[i].pmt = pmtChannel;
       ip[i].volt = voltage;
       ip[i].fb = begin;
@@ -771,14 +855,14 @@ void FitChargeDistributions_InitParam(string csvFile)
       double s_list[3] = {ip[0].s, ip[1].s,ip[2].s};
       double a_list[3] = {ip[0].a, ip[1].a,ip[2].a};
       cout << ip[0].root << " " << ip[1].root << " " << ip[2].root << endl;
-      fit_high(ip[0].root, ip[1].root, ip[2].root,
-	       ip[2].chim, ip[2].pmt,
-	       ip[0].volt, ip[1].volt, ip[2].volt,
-	       ip[2].fb, ip[2].fe,
-	       ip[2].rb, ip[2].y,
-	       ip[2].m,
-	       q_list, s_list, a_list
-	       );
+      fout << fit_high(ip[0].root, ip[1].root, ip[2].root,
+		       ip[2].chim, ip[2].pmt,
+		       ip[0].volt, ip[1].volt, ip[2].volt,
+		       ip[2].fb, ip[2].fe,
+		       ip[2].rb, ip[2].y,
+		       ip[2].m,
+		       q_list, s_list, a_list
+		       );
     }
     // If charge is 0, perform low charge fit
     else{
@@ -789,19 +873,26 @@ void FitChargeDistributions_InitParam(string csvFile)
       double q_list[3] = {ip[0].q, ip[1].q,ip[2].q};
       double s_list[3] = {ip[0].s, ip[1].s,ip[2].s};
       double a_list[3] = {ip[0].a, ip[1].a,ip[2].a}; 
-      fit_low(ip[0].root, ip[1].root, ip[2].root,
-	      ip[2].chim, ip[2].pmt,
-	      ip[0].volt, ip[1].volt, ip[2].volt,
-	      fb_list,
-	      fe_list,
-	      rb_list,
-	      ip[2].y,
-	      m_list,
-	      q_list,
-	      s_list,
-	      a_list);
+      fout << fit_low(ip[0].root, ip[1].root, ip[2].root,
+		      ip[2].chim, ip[2].pmt,
+		      ip[0].volt, ip[1].volt, ip[2].volt,
+		      fb_list,
+		      fe_list,
+		      rb_list,
+		      ip[2].y,
+		      m_list,
+		      q_list,
+		      s_list,
+		      a_list
+		      );
     }
   }
-      
-  cout << "Analysis complete" << endl;
+  
+  fout.close();
+
+  // Print statements
+  cout << "Analysis on " << csvFile << " complete" << endl;
+  cout << "Output written to:"<< endl;
+  cout << "\t" << rootOutputName << endl;
+  cout << "\t" << txtOutputFile << endl;
 }
