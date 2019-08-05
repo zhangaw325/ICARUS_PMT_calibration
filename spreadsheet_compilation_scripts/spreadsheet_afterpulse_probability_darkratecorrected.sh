@@ -92,18 +92,18 @@ for file in "${onFiles[@]}"; do
 	off_line2=$(sed '5q;d' $off_file)
 	off_line3=$(sed '6q;d' $off_file)
 
-        dark0=$(echo $off_line0 | cut -f2 -d$':')
-        dark1=$(echo $off_line1 | cut -f2 -d$':')
-        dark2=$(echo $off_line2 | cut -f2 -d$':')
-        dark3=$(echo $off_line3 | cut -f2 -d$':')
+    dark0=$(echo $off_line0 | cut -f2 -d$':')
+    dark1=$(echo $off_line1 | cut -f2 -d$':')
+    dark2=$(echo $off_line2 | cut -f2 -d$':')
+    dark3=$(echo $off_line3 | cut -f2 -d$':')
 
 	# compute probabilities
 	echo "Computing probabilities"
 
 	dr0=$(echo "$dark0/(${off_nwaves}*20*10^(-6))" | bc -l)
-        dr1=$(echo "$dark1/(${off_nwaves}*20*10^(-6))" | bc -l)
-        dr2=$(echo "$dark2/(${off_nwaves}*20*10^(-6))" | bc -l)
-        dr3=$(echo "$dark3/(${off_nwaves}*20*10^(-6))" | bc -l)
+    dr1=$(echo "$dark1/(${off_nwaves}*20*10^(-6))" | bc -l)
+    dr2=$(echo "$dark2/(${off_nwaves}*20*10^(-6))" | bc -l)
+    dr3=$(echo "$dark3/(${off_nwaves}*20*10^(-6))" | bc -l)
 
 #	echo $dr0
 #	echo $dr1
