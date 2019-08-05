@@ -15,15 +15,17 @@ const std::string out_name = "dark_rates";
 const std::string out_name_pdf = out_name + ".pdf";
 const std::string out_name_root = out_name + ".root";
 
-// histogram name
-const std::string title = "Dark rates";
+// histogram title
+std::string title = "Dark rates";
 
 // row by row
 void HistogramDarkRate(	std::string input_file_name_1, std::string input_file_name_2,
 						std::string input_file_name_3, std::string input_file_name_4,
-						bool stackHist=true){
+						bool stackHist=true, std::string new_title="Dark rates"){
 	// prep output file
 	TFile *output_file_root = new TFile(out_name_root.c_str(), "recreate");
+
+	title = new_title;
 
 	// create canvas
 	TCanvas *canvas = new TCanvas("c1", title.c_str(), 800, 600);
@@ -85,7 +87,7 @@ void HistogramDarkRate(	std::string input_file_name_1, std::string input_file_na
 	stack->GetXaxis()->SetRangeUser(0, 12);
 	stack->GetYaxis()->SetTitle("proportion of PMTs");
 
-	gPad->BuildLegend(0.65,0.65,0.95,0.95,"");
+	gPad->BuildLegend(0.55,0.55,0.85,0.85,"");
 	canvas->Update();
 
 	output_file_root->cd();
