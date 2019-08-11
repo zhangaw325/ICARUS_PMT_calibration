@@ -24,7 +24,8 @@ The script does the following:
       +  the number of pulses counted
       +  the number of afterpulse candidates counted
 
-To run the preprocessing analysis over an entire data set, a batch job can be submitted as follows:
+To run the preprocessing analysis over an entire data set, a batch job can be submitted as follows: 
+    
     1. a file named **WaveformDirectories.txt** must be created with the names of the waveform directories containing data. Only the directory names should be included, not the path to the directories. E.g. the directory at `/media/disk_a/ICARUS/PMT/Data201906/B10_PMT_5_6_7_8_1440V_LedOff` should be labeled as `B10_PMT_5_6_7_8_1440V_LedOff`.
         - this can be done, for example, using `ls > WaveformDirectories.txt` from within the directory of choice containing all of the data to be analyzed (e.g. `/media/disk_a/ICARUS/PMT/Data201906`)
 
