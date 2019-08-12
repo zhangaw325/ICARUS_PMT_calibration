@@ -1,32 +1,12 @@
-//*********************************************************************************************/
-// - For LOW-CHARGE distributions
-//     - Fits equation to each distribution (each PMT, each voltage)
-// - Processes four PMTs at a time (contrast to FitChargeDistributions_LC_ind.C)
-// - Output:
-//     - Root file
-//     - .pdf of the canvas contents
-//     - .txt of comma separated values including:
-//          - final parameters: voltage, channel number
-//                              mu, mu error, q, q error, sigma, sigma error,
-//                              amplitude, amplitude error, chi2, ndf, fit probability
-//          - initial parameters: channel id,
-//                                start fit, end fit, rebin factor,
-//                                mu, q, sigma, amplitude
-// - Uses parameter limits, which results in very poor errors
-//     - To improve the errors, save the initial parameters and rerun using
-//       FitChargeDistributions_InitParam.C
-// - The *LedOn*result.root files must be included in the same folder that this macro is stored in
-// - Do not have any *LedOff*result.root files in the folder
-// - Processes three root files in a batch (same four PMTs at three different voltages)
-// - Example function call in root:
-//       .x FitChargeDistributions_LC_batch.C("A10", 5, 6, 7, 8, 1400, 1430, 1460)
-//       - Voltages as parameters must match the nominal values matching the *result.root files
-//**********************************************************************************************/
-
+//*******************************************************************
+// Combined fitting code adapted from ROOT tutorials: combinedFit.C
+// Result root files saved as PDF
+//*******************************************************************
 
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TF1.h"
+
 #include "Fit/Fitter.h"
 #include "Fit/BinData.h"
 #include "Fit/Chi2FCN.h"
@@ -35,6 +15,8 @@
 #include "HFitInterface.h"
 #include "TCanvas.h"
 #include "TStyle.h"
+
+//#include "Fit_Spe.C" // the fit function is defined in this file
 
 // constants
 double PI = TMath::Pi();
@@ -63,18 +45,45 @@ int ipar3[NPAR_i] = {  0,  // common mu
 double IdealResponse(double *x,double *par);
 Double_t truncatedMean(TH1 *hist, int n_iterations, int n_rejection_stddevs = 3);
 
+/*
+// create combined chi2 structure
+struct GlobalChi2 {
+  
+GlobalChi2( ROOT::Math::IMultiGenFunction & f1,
+ROOT::Math::IMultiGenFunction & f2,
+ROOT::Math::IMultiGenFunction & f3) : 
+fChi2_1(&f1), fChi2_2(&f2), fChi2_3(&f3) {}
+
+double operator() (const double *par) const {
+double p1[NPAR_i];
+double p2[NPAR_i];
+double p3[NPAR_i];
+
+for (int i = 0; i < NPAR_i; ++i){
+p1[i] = par[ipar1[i]];
+p2[i] = par[ipar2[i]];
+p3[i] = par[ipar3[i]];
+}
+
+return (*fChi2_1)(p1) + (*fChi2_2)(p2) + (*fChi2_3)(p3);
+}
+
+const  ROOT::Math::IMultiGenFunction * fChi2_1;
+const  ROOT::Math::IMultiGenFunction * fChi2_2;
+const  ROOT::Math::IMultiGenFunction * fChi2_3;
+};
+*/
+
 
 void FitChargeDistributions_LC_batch(string pmtRow,
 				     char pmt1, char pmt2, char pmt3, char pmt4,
-				     int volt1, int volt2, int volt3){
+				     int volt1, int volt2, int volt3, bool led){
 
   const int NCH = 4; // 4 PMTs
-  
   // histogram and fit options
   int rbf_0 = 2;
   double fbc_0 = 0.50;
   double fec_0 = 40.0;
-  gStyle->SetOptFit(1111); // formatting
   //******* CHANGE VALUES HERE TO BE WRITTEN TO OUTPUT FILE *******
   // rebin histogram
   int rebinfactor[NCH][3]={{rbf_0, rbf_0, rbf_0}, // pmt 0
@@ -91,45 +100,50 @@ void FitChargeDistributions_LC_batch(string pmtRow,
 			     {fec_0, fec_0, fec_0}, // pmt 1
 			     {fec_0, fec_0, fec_0}, // pmt 2
 			     {fec_0, fec_0, fec_0}};// pmt 3
-  // ***************************************************************
-  
-  // arrays storing parameter information for a particular function
-  string initparam[NCH][3]; // for outputting initial parameters
+  string initparam[NCH][3];
+
+  gStyle->SetOptFit(1111);
+
   double par[NPAR_i];
   double parerr[NPAR_i];
-  
-  // file handling
+  // process 3 files in a batch
   string rtfilenames[3];
-  string pdfname[4];
+  string resultnames[4];
   double channelnames[4] = {0,1,2,3};
   string strchimney = pmtRow + "_PMT_";
   string strpmt = to_string(pmt1) + "_" + to_string(pmt2) + "_" + to_string(pmt3) + "_" + to_string(pmt4) + "_";
-  string voltagestr[3] = {to_string(volt1), to_string(volt2), to_string(volt3)};  
+  string voltagestr[3] = {to_string(volt1), to_string(volt2), to_string(volt3)};
+  string ledstr;
+  if(led)
+    ledstr = "On";
+  else
+    ledstr = "Off";
+  
   for(int i=0; i<3; i++){
-    rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_LedOn_result.root";
+    rtfilenames[i]  = strchimney + strpmt + voltagestr[i] + "V_Led" + ledstr + "_result.root";
     cout << rtfilenames[i] << endl;
   }
   for(int i=0; i<4; i++){
-    pdfname[i]  = strchimney + strpmt + "CH" + channelnames[i] + "_"
-      + "LedOn_lowcharge.pdf";
-    cout << pdfname[i] <<endl;
-  } 
+    resultnames[i]  = strchimney + strpmt + "CH" + channelnames[i] + "_"
+      + "Led" + ledstr + "_lowcharge.pdf";
+    cout << resultnames[i] <<endl;
+  }
+    
   string outnameroot = strchimney + strpmt + "lowcharge_gain_.root";
   string outnametxt = strchimney + strpmt + "lowcharge_gain_fit.txt";
   TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
   fstream foutFit(outnametxt.c_str(),ios::out);
+  TH1F* hCharge[3]; // histograms for each canvas
+  TCanvas* c[4];
+  char tempname[100];
+
   TFile* files[3];
+  
   // Read each of the three data ROOT files and save them to files[]
   for(int i = 0; i < 3; i++){
     files[i] = new TFile(rtfilenames[i].c_str(),"read");
   }
 
-  // canvas handling
-  TH1F* hCharge[3]; // histograms for each canvas
-  TCanvas* c[4];
-  char tempname[100];
-
-  // minimize a max of 5000 times
   ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(5000);
 
   // Print header
@@ -217,6 +231,7 @@ void FitChargeDistributions_LC_batch(string pmtRow,
     // Generate canvas and plot the PMT histograms on them
     sprintf(tempname, "c_%d",i);
     string canvasTitle = strchimney + to_string(i);
+    //sprintf(canvasTitle,strchimney + "%d",i); // generate canvas title
     c[i] = new TCanvas(tempname,canvasTitle.c_str(),1400,600); // generate canvas
     c[i]->Divide(3); // divide canvas into 3 pads along the width
     for(int j = 0; j < 3; j++){
@@ -278,7 +293,7 @@ void FitChargeDistributions_LC_batch(string pmtRow,
     // write results to output ROOT file
     outROOTfile->cd();
     c[i]->Write();
-    c[i]->Print(pdfname[i].c_str(),"pdf");
+    c[i]->Print(resultnames[i].c_str(),"pdf");
   }
     
   // print initial parameters at end of root file

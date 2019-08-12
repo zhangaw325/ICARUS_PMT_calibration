@@ -1,6 +1,5 @@
 //*********************************************************************************************/
 // - For HIGH-CHARGE distributions
-//     - Combined fit using a single chi2 value and holding mu constant across three voltages
 // - Combined fitting code adapted from ROOT tutorials: combinedFit.C
 // - Output:
 //     - Root file
@@ -15,11 +14,11 @@
 // - Uses parameter limits, which results in very poor errors
 //     - To improve the errors, save the initial parameters and rerun using
 //       FitChargeDistributions_InitParam.C
-// - The *LedOn*result.root files must be included in the same folder that this macro is stored in
-// - Do not have any *LedOff*result.root files in the folder
+// - The *result.root files must be included in the same folder that
+//   this macro is stored in
 // - Processes three root files in a batch (same four PMTs at three different voltages)
 // - Example function call in root:
-//       .x FitChargeDistributions.C("A10", 5, 6, 7, 8, 1400, 1430, 1460)
+//       void FitChargeDistributions("A10", 5, 6, 7, 8, 1400, 1430, 1460)
 //       - voltages as parameters must match the nominal values matching the *result.root files
 //**********************************************************************************************/
 
@@ -90,7 +89,6 @@ void FitChargeDistributions(string pmtRow,
 			    int volt1, int volt2, int volt3){
   
   const int NCH = 4; // 4 PMTs
-  
   // histogram and fit options
   int rbf_0 = 1;
   double fbc_0 = 1;
@@ -101,7 +99,7 @@ void FitChargeDistributions(string pmtRow,
   gStyle->SetOptFit(1111); // formatting
 
   // arrays storing parameter information for a particular function
-  string initparam[NCH]; // for outputting initial parameters
+  string initparam[4]; // for outputting initial parameters
   double par[NPAR_i];
   double parerr[NPAR_i];
 
@@ -144,7 +142,8 @@ void FitChargeDistributions(string pmtRow,
   // Generate 4 canvases and plot the PMT histograms on them
   for(int i = 0; i < 4; i++){
     sprintf(tempname, "c_%d",i);
-    string canvasTitle = strchimney + to_string(i);
+    string canvasTitle = strchimney + to_string(i+1);
+    //sprintf(canvasTitle,strchimney + "%d",i); // generate canvas title
     c[i] = new TCanvas(tempname,canvasTitle.c_str(),1400,600); // generate canvas
     c[i]->Divide(3); // divide canvas into 3 pads along the width
 
