@@ -5,7 +5,7 @@ Data is processed in a series of steps. First, preprocessing is performed using 
 
 Bash scripts used to read analysis outputs and write them to text in a format convenient for spreadsheet entry are located in the **spreadsheet_compilation_scripts** directory. Bash scripts for creating and running Condor analysis jobs are located in the **condor_analysis_scripts** directory.
 
-Finally, old code is located in the **old_code** directory for archival reasons.
+Finally, old code is located in the **old_code** directory for archival purposes.
 
 ## Preprocessing
 
@@ -48,6 +48,25 @@ For each directory containing data, the printed results of the preprocessing scr
 The FitChargeDistributions.C reads in the root file produced from previous step, and fit charge distributions with Poisson function convoluted with a Guassian function.
   -  All 4 PMTs' distributions and all 3 HV data points are fit
   -  a text file will be output to give the fit parameters
+
+### Gain vs voltage analysis
+
+The script **GainVoltage.C** performs analysis to determine the PMT gain as a function of voltage. It does the following:
+
+ - **input:** a text file containing the following 4 space-separated columns:
+    1. PMT number
+    2. PMT voltage
+    3. gain
+    4. gain error
+
+    Each row is information for a single PMT at a single voltage. The order of the rows should not matter, nor should it matter if a PMT number is missing. Problems will arise if more than 6 rows contain information for a single PMT.
+
+    The function input is the name of the text file, without `.txt` at the end. E.g. if the input file is `A10.txt`, then `GainVoltage("A10")` should be called.
+
+ - **output:**
+     + PDF files with a gain-voltage fit for each PMT on both log-log and linear plots
+     + ROOT file containing all gain-voltage fits
+     + comma-separated text file containing fit parameters for each PMT, in increasing numerical PMT order
 
 ## Dark rate analysis
 
