@@ -16,8 +16,11 @@ rtfileoutputStr = filehead + "_result.root"
 print("Analyzing data from " + filehead + ". Files listed in " + filelistStr)
 
 
+# determine whether the LED was on based on the filename
 def isLEDOn(directoryName):
     if directoryName.find("On") > -1:
+        return True
+    elif directoryName.find("ON") > -1:
         return True
     else:
         return False
@@ -33,7 +36,7 @@ QFactor = tpt / 50.0 * 1000.0  # convert V*ns/50Ohm to charge in pC
 Nsigma = 10
 afterpulse_cut = 480  # time after which to consider pulse an afterpulse, in ns
 # index after which to consider a pulse an afterpulse
-afterpulse_cut_index = 480 / tpt
+afterpulse_cut_index = afterpulse_cut / tpt
 
 # divided by 4 because 4 PMTs in group
 Nwaves = len(open(filelistStr).readlines()) / 4
@@ -401,10 +404,6 @@ def main():
     time2 = [0 for x in range(Nwaves)]
     for ch in range(NCH):
         for waveNb in range(Nwaves):
-
-            # flag to determine whether there was afterpulse
-            afterpulse_flag = False
-
             afilename = f.readline().rstrip()
             awave = np.asarray(decode_wfm(afilename))
 
@@ -422,9 +421,8 @@ def main():
                 flag2[waveNb] = True
                 time2[waveNb] = TimeBinOfAmplitude
 
-            # get charge integration about the amplitude: 20.8 ns before to 36.8 ns after the amplitude
-            # sumcharge = 0.0
-            # if TimeBinOfAmplitude>=168 and TimeBinOfAmplitude<=180:
+            # get charge integration about the amplitude: 20.8 ns before to
+            # 36.8 ns after the amplitude
             sumcharge = np.sum(
                 awave[TimeBinOfAmplitude - 13:TimeBinOfAmplitude + 23])
             pulsestartbin = TimeBinOfAmplitude
@@ -478,26 +476,29 @@ def main():
 
                 # determine whether this occurred after an LED pulse
                 if peakindex[pulse_i] > afterpulse_cut_index:
-                    # if so, trigger the afterpulse flag
-                    afterpulse_flag = True
+                    # if so, count it
                     num_afterpulse_events[ch] += 1.0
 
+            # store every 100th waveform to the ROOT file
             if waveNb % 100 == 0:
-                # print ch, waveNb, afilename
                 for bin in range(0, NSamples, 1):
                     hWave_list[ch].SetBinContent(
                         bin + 1, -1000.0 * (awave[bin] - baseline_mean))
-                    # hWave_list[ch].SetBinContent(bin+1,awave[bin])
+
                 waveDir.cd()
                 lenname = int(len(afilename))
                 newName = "Wave_Ch_" + \
                     str(ch) + "_" + str(waveNb) + \
                     afilename[lenname - 4 - 17:lenname - 4]
+
+                # construct waveform title
                 titleName = "Evt " + str(waveNb) + \
                     "_Ch" + str(ch) + "_PulseBins_"
+                # add all pulse bins to waveform title
                 for pulse_i in range(len(peakindex)):
                     titleName += str(peakindex[pulse_i])
                     titleName += "_"
+
                 hWave_list[ch].SetName(newName)
                 hWave_list[ch].SetTitle(titleName)
                 hWave_list[ch].SetEntries(NSamples)
