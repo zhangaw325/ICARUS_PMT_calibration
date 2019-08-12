@@ -51,4 +51,10 @@ The FitChargeDistributions.C reads in the root file produced from previous step,
 
 ## Dark rate analysis
 
+Dark pulses are counted using the number of pulses counted in LED-off data. These pulses are counted in preprocessing. Currently, dark rates themselves are calculated externally, in a spreadsheet. The script **dark_rate/HistogramDarkRate.C** exists solely to produce histograms of the dark rates.
+
 ## Afterpulse analysis
+
+Most of the afterpulse probability determination is performed during preprocessing. The number of afterpulse candidate events is recorded then. In order to convert to a probability with dark rate subtraction, the Bash script **afterpulse/calculate_afterpulse_probabilities.sh** is used. The script assumes that three data sets are collected for each chimney --- the **\*.output** files for the chimney must all be present in the same directory as the script. As an input, the script takes a chimney name, e.g. `A10`. It then searches for the output files with `A10` at the front, and proceeds from there.
+
+**afterpulse/AnalyzeAfterpulse.C** contains some preliminary code to do some basic afterpulse time-structure analysis.
