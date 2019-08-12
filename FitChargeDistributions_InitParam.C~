@@ -10,10 +10,6 @@
 //   ROOT File Name,Chimney,PMT channel,Voltage,Fit Begin,Fit End, Rebin Factor,Y Max,Mu (NPE),q (SPE),Sigma (SPE),Amplitude,Charge
 //    - There should not be any empty rows or columns in the .csv file
 //
-// - The *LedOn*result.root files must be included in the same folder that this macro is stored in
-//
-// - Do not have any *LedOff*result.root files in the folder
-//
 // - Output (for each PMT):
 //     - Root file
 //     - .pdf of the canvas contents
