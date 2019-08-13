@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-read -p "Enter PMT chimney you wish to compile into spreadsheet form: " chimney
+read -p "Enter PMT chimney for which you wish to calculate afterpulse probabilities: " chimney
 echo $chimney
 
 # find LED on files
@@ -105,25 +105,10 @@ for file in "${onFiles[@]}"; do
     dr2=$(echo "$dark2/(${off_nwaves}*20*10^(-6))" | bc -l)
     dr3=$(echo "$dark3/(${off_nwaves}*20*10^(-6))" | bc -l)
 
-#	echo $dr0
-#	echo $dr1
-#	echo $dr2
-#	echo $dr3
-
-#	echo $pulse0
-#	echo $pulse1
-#	echo $pulse2
-#	echo $pulse3
-
 	prob0=$(echo "($pulse0 - ($dr0*$nwaves*20*10^(-6)))/$nwaves" | bc -l)
 	prob1=$(echo "($pulse1 - ($dr1*$nwaves*20*10^(-6)))/$nwaves" | bc -l)
 	prob2=$(echo "($pulse2 - ($dr2*$nwaves*20*10^(-6)))/$nwaves" | bc -l)
 	prob3=$(echo "($pulse3 - ($dr3*$nwaves*20*10^(-6)))/$nwaves" | bc -l)
-
-#	echo $prob0
-#	echo $prob1
-#	echo $prob2
-#	echo $prob3
 
 	# output in proper order
 	out_nums[$out_index]=$prob0
@@ -144,7 +129,7 @@ function join_by { local IFS="$1"; shift; echo "$*"; }
 
 # print output and finish up
 echo "PMT numbers are ${PMT_nums[*]}"
-echo "Pulse values are ${out_nums[*]}"
+echo "Probabilities are ${out_nums[*]}"
 
 pmt_string=$(join_by _ "${PMT_nums[@]}")
 filename="${chimney}_afterpulseprobs_${pmt_string}"

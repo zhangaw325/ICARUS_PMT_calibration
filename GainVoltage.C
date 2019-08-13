@@ -1,9 +1,16 @@
-//*******************************************************************
+//***************************************************************************
 // Plots gain versus voltage and performs a power log fit on data
 //
-// Input must be CHIMNEY.txt
-// Input format must be PMT# Voltage Gain GainError
-//*******************************************************************
+// - Input must be CHIMNEY.txt
+// - Input format must be:
+//     PMT# Voltage Gain GainError
+//
+// - Output:
+//    - PDF file containing log-log fit (and linear display) for each PMT
+//    - ROOT file containing all gain-voltage fits
+//    - comma-separated text file containing fit parameters for each PMT, 
+//      in increasing numerical PMT order
+//***************************************************************************
 
 #include "TCanvas.h"
 #include "TGraphErrors.h"
@@ -13,37 +20,40 @@
 #include "TLegend.h"
 #include "TMath.h"
 #include "TFile.h"
+#include "TFrame.h"
 
 #include <fstream>
 
-double power(double* x, double* par);
-
 const int NPMT = 10;
 
-void GainVoltage(string chimney){
-  // Variables
-  double fbegin = 1000;   // begin fit
-  double fend = 2000;     // end fit
-  int NPAR = 2;        // number of parameters
+void GainVoltage(std::string chimney){
+
+  // some constants
+  const double fbegin = 1000;   // begin fit
+  const double fend = 2000;     // end fit
+  const int NPAR = 2;           // number of parameters
   
-  // output files
-  string outnamepdf[10];
+  // generate output PDF file names
+  std::string outnamepdf[10];
 
   for(int i = 0; i < NPMT; i++){
-    outnamepdf[i] = chimney + "_" + to_string(i + 1) + "_gainvsvoltage.pdf";
+    outnamepdf[i] = chimney + "_" + std::to_string(i + 1) + "_gainvsvoltage.pdf";
   }
 
-  string outnametxt = chimney + "_gainvsvoltage.txt";
-  string outnameroot = chimney + "_gainvsvoltage.root";
+  // generate other output file names
+  std::string outnametxt = chimney + "_gainvsvoltage.txt";
+  std::string outnameroot = chimney + "_gainvsvoltage.root";
   TFile* outROOTfile = new TFile(outnameroot.c_str(),"recreate");  
   fstream fout(outnametxt.c_str(),ios::out);
 
+  // prepare canvases for each fit
   TCanvas *c[NPMT];
 
+  // analyze each PMT
   for(int pmt_num = 0; pmt_num < NPMT; pmt_num++){
 
     // read gain and voltage values for the PMT in question
-    string input_file_name = chimney + ".txt";
+    std::string input_file_name = chimney + ".txt";
     std::ifstream input_file(input_file_name);
 
     Double_t voltage_raw[6];
@@ -75,6 +85,7 @@ void GainVoltage(string chimney){
     Double_t gain_nolog[num_data_points];
     Double_t gain_error_nolog[num_data_points];
 
+    // populate properly sized arrays
     for(int i = 0; i < num_data_points; i++){
       voltage[i] = TMath::Log(voltage_raw[i]);
       gain[i] = TMath::Log(gain_raw[i]);
@@ -88,11 +99,12 @@ void GainVoltage(string chimney){
     }
 
     if(num_data_points != 3 && num_data_points != 6){
-      cout << "Improper number of data points for PMT " << pmt_num + 1 << ". SKIPPING" << endl;
+      std::cout << "Improper number of data points for PMT " 
+                << pmt_num + 1
+                << ". SKIPPING" 
+                << std::endl;
       continue;
     }
-
-    // Define power law fit function
 
     // Perform linear fit on log-log plot
     TF1 *fit = new TF1("fit", "pol1", fbegin, fend);
@@ -105,7 +117,7 @@ void GainVoltage(string chimney){
     // Create canvas
     char tempname[100];
     sprintf(tempname, "c_%d",pmt_num);
-    string canvasTitle = chimney + "_" + to_string(pmt_num + 1);
+    std::string canvasTitle = chimney + "_" + std::to_string(pmt_num + 1);
     c[pmt_num] = new TCanvas(tempname,canvasTitle.c_str(),200,10,600,700);
     c[pmt_num]->Divide(1,2);
 
@@ -116,7 +128,7 @@ void GainVoltage(string chimney){
 
     // Create graph of data
     TGraph* data = new TGraphErrors(num_data_points, voltage, gain, voltage_error, gain_error);
-    string title =  "PMT " + chimney + "_" + to_string(pmt_num + 1) + " gain vs voltage (log);"
+    std::string title =  "PMT " + chimney + "_" + std::to_string(pmt_num + 1) + " gain vs voltage (log);"
                     + "log(voltage [V]);"
                     + "log(gain)";
     data->SetTitle(title.c_str());
@@ -124,34 +136,38 @@ void GainVoltage(string chimney){
 
     // Fit
     fit->SetParameters(-30,7);
-    cout << "Fitting " << pmt_num + 1 << endl;
+    std::cout << "Fitting " << pmt_num + 1 << std::endl;
     data->Fit("fit","ME");
     for(int j = 0; j < 9; j++){
-	fit->GetParameters(par);
-	fit->SetParameters(par[0],par[1]);
-	data->Fit("fit","ME");
+      fit->GetParameters(par);
+      fit->SetParameters(par[0],par[1]);
+      data->Fit("fit","ME");
     }
-    //data->Fit("fit","E");
+
+    // extract fit parameters
     gStyle->SetOptFit();
     fit->GetParameters(par);
     Double_t constant = par[0];
     Double_t exponent = par[1];
     Double_t amplitude = TMath::Exp(constant);
-    //fout << "PMT" << "\t" << pmt_num + 1 
+
+    // write fit parameters to output text file
     for(int j = 0; j < 2; j++){
+      // fill first two lines for each PMT with dashes
       fout  << "--" << "," << "--"
             << "," << "--" << "," << "--"
             << "," << "--"
             << "," << "--"
             << "," << "--"
-            << endl;
+            << std::endl;
     }
+    // populate third line for each PMT with actual values
     fout << constant <<","<<fit->GetParError(0)
          << "," << exponent <<","<<fit->GetParError(1)
          << "," << fit->GetChisquare()
          << "," << fit->GetNDF()
          << "," << fit->GetProb()
-         <<endl;
+         << std::endl;
 
     // Plot gain and voltage
     data->Draw("ap");
@@ -165,7 +181,7 @@ void GainVoltage(string chimney){
     TGraph *dataLinear = new TGraphErrors(  num_data_points, voltage_nolog, 
                                         gain_nolog, voltage_error_nolog, 
                                         gain_error_nolog);
-    title = "PMT " + chimney + "_" + to_string(pmt_num + 1) + " gain vs voltage (linear);"
+    title = "PMT " + chimney + "_" + std::to_string(pmt_num + 1) + " gain vs voltage (linear);"
                    + "voltage [V];"
                    + "gain";
     dataLinear->SetTitle(title.c_str());
@@ -183,11 +199,4 @@ void GainVoltage(string chimney){
     c[pmt_num]->Write();
     c[pmt_num]->Print(outnamepdf[pmt_num].c_str(),"pdf");
   }
-}
-
-// Power law function definition: a * (x ^ k)
-Double_t power(double* x, double* par){
-  double k = par[0];
-  double a = par[1];
-  return k*TMath::Power(x[0],a);
 }
