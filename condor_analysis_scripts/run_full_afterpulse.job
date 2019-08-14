@@ -1,0 +1,16 @@
+Universe = vanilla
+Executable = run_full_afterpulse.sh
+
+Rank = CPU_Speed
+
+# request_cpus = 4
+
+input 	= /home/kbenkend/ICARUS/PMT/Calibration/
+output 	= run_full_afterpulse.out
+error 	= run_full_afterpulse.error
+log 	= run_full_afterpulse.log
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT_OR_EVICT
+
+Queue

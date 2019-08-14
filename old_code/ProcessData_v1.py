@@ -18,9 +18,17 @@ import peakutils
 
 #some input
 tempStr = "filelist_"
-filehead = "A18_PMT_5_6_7_8_1460V_LedOff"
+filehead = raw_input("Directory name: ") # ask user for data directory input
 filelistStr = tempStr + filehead + ".txt"
 rtfileoutputStr = filehead + "_result.root"
+dataDirectory = "/home/azhang/ICARUS/PMT/Data201905/" + filehead + "/"
+print("Analyzing data from " + dataDirectory + ". Files listed in " + filelistStr)
+
+# record whether LED was on or off
+ledStatus = raw_input("LED On or Off (1 for on, 0 for off)?: ")
+while (ledStatus != '1' and ledStatus != '0'):
+    ledStatus = raw_input("Input must be 0 or 1: ")
+ledStatus = int(ledStatus)
 
 #some constants
 NSamples = 12500 # number of data points in one waveform
@@ -307,7 +315,11 @@ def main():
         hPedWidth_list.append(hist)
         # pulse charge due to fiber triggers, unit converted to fC
         name = "FinalCharge_" + str(i)
-        hist = TH1F(name,"",5100/2,-10,500)
+        # would be best to have different settings for LED on vs LED off
+        if ledStatus == 0:
+            hist = TH1F(name,"",80,-3,3)
+        else:
+            hist = TH1F(name,"",18,-4,50)
         hist.SetXTitle("Charge (pC)")
         hist.SetYTitle("Counts")
         hist.SetLineColor(i+1)
@@ -384,7 +396,7 @@ def main():
             #print afilename
             #if waveNb>20:
             #    continue
-            awave = np.asarray(decode_wfm(afilename))
+            awave = np.asarray(decode_wfm(dataDirectory + afilename))
             #print "dump data "
             #for bin in range(NSamples):
             #    print awave[bin]
